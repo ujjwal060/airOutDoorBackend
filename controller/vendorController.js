@@ -158,4 +158,27 @@ const editProfile=async(req,res)=>{
     res.status(500).json({ message: error.message });
   }
 }
-module.exports = { createVendor, login, sendEmailOTP, resetPassword,editProfile }
+
+const changePassword=async(req,res)=>{
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const { id } = req.params;
+    if (!oldPassword || !newPassword) {
+      return res.status(400).send('Old password and new password are required');
+    }
+    const users = await Vendor.findById(id);
+    if (!users) return res.status(404).send('Vendor not found');
+
+    const isPasswordValid = await bcrypt.compare(oldPassword, users.password);
+    if (!isPasswordValid) return res.status(400).send('Old password is incorrect');
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    users.password = hashedPassword;
+
+    await users.save();
+    res.status(200).json({ message: 'Password changed' });
+  } catch (error) {
+    res.status(500).json({ message:error.message});
+  }
+}
+module.exports = { createVendor, login, sendEmailOTP, resetPassword,editProfile,changePassword }
