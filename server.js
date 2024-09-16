@@ -4,8 +4,7 @@ const mongoose = require("mongoose");
 const bodyParser = require('body-parser');
 const cors = require("cors");
 
-const adminauthRoute = require("./routes/adminRoute");
-
+const apiRoutes = require("./apiRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -24,9 +23,9 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(bodyParser.json());
 
-app.use("/api/admin", adminauthRoute);
+app.use("/", apiRoutes);
 
-// Connect to MongoDB
+
 mongoose.set("strictQuery", false);
 mongoose
   .connect(MONGO_URL)
