@@ -1,7 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Vendor = require('../model/vendorModel');
-const sendEmail  = require('../comman/sendEmail');
+const sendEmail = require('../comman/sendEmail');
 
 const createVendor = async (req, res) => {
   const { name, email, password, phone, address } = req.body;
@@ -109,6 +109,36 @@ const sendEmailOTP = async (req, res) => {
   }
 }
 
+const verifyOTP = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const user = await Vendor.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' });
+    }
+
+    if (user.verificationCode !== otp) {
+      return res.status(400).json({ message: 'Invalid verification code' });
+    }
+
+    if (user.verificationCodeExpires < Date.now()) {
+      return res.status(400).json({ message: 'Verification code has expired' });
+    }
+
+    user.isVerified = true;
+    user.verificationCode = undefined;
+    user.verificationCodeExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ message: 'Verification success. You can now create a password.' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+}
+
+
 const resetPassword = async (req, res) => {
   const { email, otp, newPassword } = req.body;
 
@@ -137,7 +167,7 @@ const resetPassword = async (req, res) => {
   }
 }
 
-const editProfile=async(req,res)=>{
+const editProfile = async (req, res) => {
   try {
     const vendorId = req.params.id;
     const { name, phone, address, businessInfo } = req.body;
@@ -159,14 +189,14 @@ const editProfile=async(req,res)=>{
   }
 }
 
-const changePassword=async(req,res)=>{
+const changePassword = async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
-    const { id } = req.params;
+    const vendorId = req.params.id;
     if (!oldPassword || !newPassword) {
       return res.status(400).send('Old password and new password are required');
     }
-    const users = await Vendor.findById(id);
+    const users = await Vendor.findById(vendorId);
     if (!users) return res.status(404).send('Vendor not found');
 
     const isPasswordValid = await bcrypt.compare(oldPassword, users.password);
@@ -178,7 +208,7 @@ const changePassword=async(req,res)=>{
     await users.save();
     res.status(200).json({ message: 'Password changed' });
   } catch (error) {
-    res.status(500).json({ message:error.message});
+    res.status(500).json({ message: error.message });
   }
 }
-module.exports = { createVendor, login, sendEmailOTP, resetPassword,editProfile,changePassword }
+module.exports = { createVendor, login, sendEmailOTP, resetPassword, editProfile,verifyOTP, changePassword }
