@@ -24,9 +24,9 @@ const login = async (req, res) => {
 };
 
 const vendorApprove = async (req, res) => {
-  const { status } = req.body;
+  const { vendorId,status } = req.body;
   try {
-    const vendor = await Vendor.findOne({vendorId:req.params.vendorId});
+    const vendor = await Vendor.findOne({vendorId:vendorId});
 
     if (!vendor) {
       return res.status(404).json({ message: 'Vendor not found' });
@@ -57,4 +57,49 @@ const vendorApprove = async (req, res) => {
   }
 }
 
-module.exports = { login,vendorApprove }
+const allVendor=async(req,res)=>{
+  try {
+    const { search, page, limit } = req.body;
+
+    const pageNumber = page || 1;
+    const pageSize = limit || 10;
+
+    const aggregation = [];
+
+    if (search) {
+      aggregation.push({
+        $match: { name: { $regex: search, $options: 'i' } }
+      });
+    }
+
+    aggregation.push({
+      $facet: {
+        data: [
+          { $skip: (pageNumber - 1) * pageSize },
+          { $limit: pageSize },
+        ],
+        totalCount: [
+          { $count: 'count' }
+        ]
+      }
+    });
+
+    const results = await Vendor.aggregate(aggregation);
+
+    const vendors = results[0].data;
+    const totalUsers = results[0].totalCount[0] ? results[0].totalCount[0].count : 0;
+    const totalPages = Math.ceil(totalUsers / pageSize);
+
+    res.json({
+      vendors,
+      totalUsers,
+      totalPages,
+      currentPage: pageNumber,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+module.exports = { login,vendorApprove,allVendor }
