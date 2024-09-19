@@ -8,7 +8,7 @@ const createVendor = async (req, res) => {
   try {
     const existingVendor = await Vendor.findOne({ email });
     if (existingVendor) {
-      return res.status(400).json({ message: 'Vendor with this email already exists' });
+      return res.status(400).json({ message: 'This email already exists' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -95,8 +95,8 @@ const sendEmailOTP = async (req, res) => {
     }
 
     const otp = generateOTP();
-    vendor.resetPasswordOTP = otp;
-    vendor.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
+    vendor.otp = otp;
+    vendor.expires = Date.now() + 15 * 60 * 1000;
     await vendor.save();
 
     const subject = 'Password Reset OTP';
@@ -119,17 +119,17 @@ const verifyOTP = async (req, res) => {
       return res.status(400).json({ message: 'User not found' });
     }
 
-    if (user.verificationCode !== otp) {
+    if (user.otp !== otp) {
       return res.status(400).json({ message: 'Invalid verification code' });
     }
 
-    if (user.verificationCodeExpires < Date.now()) {
+    if (user.expires < Date.now()) {
       return res.status(400).json({ message: 'Verification code has expired' });
     }
 
     user.isVerified = true;
-    user.verificationCode = undefined;
-    user.verificationCodeExpires = undefined;
+    user.otp = undefined;
+    user.expires = undefined;
     await user.save();
 
     res.status(200).json({ message: 'Verification success. You can now create a password.' });
