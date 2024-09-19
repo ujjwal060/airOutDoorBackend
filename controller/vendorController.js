@@ -55,7 +55,7 @@ const login = async (req, res) => {
     }
 
     if (!vendor.isApproved) {
-      return res.status(403).json({ message: 'Vendor is not approved yet' });
+      return res.status(403).json({ message: 'Vendor is not approved yet',isApproved:false });
     }
 
     const isMatch = await bcrypt.compare(password, vendor.password);
@@ -91,7 +91,7 @@ const sendEmailOTP = async (req, res) => {
     const vendor = await Vendor.findOne({ email });
 
     if (!vendor) {
-      return res.status(404).json({ message: 'Vendor not found' });
+      return res.status(404).json({ message: 'Vendor not found , please check your email' });
     }
 
     const otp = generateOTP();
@@ -129,7 +129,6 @@ const verifyOTP = async (req, res) => {
 
     user.isVerified = true;
     user.otp = undefined;
-    user.expires = undefined;
     await user.save();
 
     res.status(200).json({ message: 'Verification success. You can now create a password.' });
@@ -140,7 +139,7 @@ const verifyOTP = async (req, res) => {
 
 
 const resetPassword = async (req, res) => {
-  const { email, otp, newPassword } = req.body;
+  const { email, newPassword } = req.body;
 
   try {
     const vendor = await Vendor.findOne({ email });
@@ -149,7 +148,7 @@ const resetPassword = async (req, res) => {
       return res.status(404).json({ message: 'Vendor not found' });
     }
 
-    if (vendor.resetPasswordOTP !== otp || Date.now() > vendor.resetPasswordExpires) {
+    if (Date.now() > vendor.resetPasswordExpires) {
       return res.status(400).json({ message: 'Invalid or expired OTP' });
     }
 
@@ -157,7 +156,6 @@ const resetPassword = async (req, res) => {
     const hashedPassword = await bcrypt.hash(newPassword, salt);
 
     vendor.password = hashedPassword;
-    vendor.otp = undefined;
     vendor.expires = undefined;
     await vendor.save();
 
