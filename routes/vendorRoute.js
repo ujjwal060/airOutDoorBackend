@@ -5,7 +5,7 @@ const upload=require('../comman/multerConfig')
 const router = express.Router();
 
 
-router.post('/sigup',upload.single('profileImage'), createVendor);
+router.post('/signup',upload.single('profileImage'), createVendor);
 router.post('/login', login);
 router.post('/sendOTP', sendEmailOTP);
 router.post('/verifyOTP', verifyOTP);
