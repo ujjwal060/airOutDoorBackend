@@ -11,7 +11,7 @@ const {
 const router = express.Router();
 
 
-router.post('/sigup', signupUser);
+router.post('/signup', signupUser);
 router.post('/verifyCode', userVerify);
 router.post('/setPassword', setPassword);
 router.post('/login', loginUser);
