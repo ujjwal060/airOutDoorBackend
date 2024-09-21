@@ -201,32 +201,9 @@ const forgate = async (req, res) => {
 
         res.status(200).json({ message: 'OTP sent to your email for password reset' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error during password reset request', error: error.message });
+        res.status(500).json({ message:error.message });
     }
 }
-
-const resetPassword = async (req, res) => {
-    try {
-        const { email, newPassword } = req.body;
-
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            return res.status(400).json({ message: 'User not found' });
-        }
-
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
-        user.password = hashedPassword;
-
-        await user.save();
-
-        res.status(200).json({ message: 'Password reset successfully. You can now log in with your new password.' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error during password reset', error: error.message });
-    }
-};
 
 const changePassword = async (req, res) => {
     try {
@@ -259,6 +236,5 @@ module.exports = {
     setPassword,
     loginUser,
     forgate,
-    resetPassword,
     changePassword
 }

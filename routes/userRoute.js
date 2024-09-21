@@ -6,7 +6,6 @@ const {
     setPassword,
     loginUser,
     forgate,
-    resetPassword,
     changePassword } = require('../controller/userController');
 const router = express.Router();
 
@@ -17,7 +16,6 @@ router.post('/setPassword', setPassword);
 router.post('/login', loginUser);
 router.post('/sendOTP', resendCode);
 router.post('/forgate', forgate);
-router.post('/reset', resetPassword);
 router.put('/changePassword/:id', changePassword);
 
 
