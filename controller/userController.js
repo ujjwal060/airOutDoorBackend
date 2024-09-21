@@ -140,9 +140,14 @@ const resendCode = async (req, res) => {
 
 const loginUser = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { username, password } = req.body;
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({
+            $or: [
+              { email: username },
+              { username: username }
+            ]
+          });
         if (!user) {
             return res.status(400).json({ message: 'User not found' });
         }
@@ -168,7 +173,7 @@ const loginUser = async (req, res) => {
             data: user
         });
     } catch (error) {
-        res.status(500).json({ message: 'Server error during login', error: error.message });
+        res.status(500).json({ message:error.message });
     }
 };
 
