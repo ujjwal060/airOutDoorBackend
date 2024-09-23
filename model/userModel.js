@@ -24,7 +24,7 @@ const userSchema = new mongoose.Schema({
     required: true,
     trim: true,
     validate: {
-      validator: function(v) {
+      validator: function (v) {
         return /\d{10}/.test(v);
       },
       message: props => `${props.value} is not a valid mobile number!`
@@ -32,8 +32,16 @@ const userSchema = new mongoose.Schema({
   },
   userType: {
     type: String,
-    enum: ['adventurer', 'host'],
-    default: 'adventurer',
+    enum: ['adventures', 'properties'],
+    default: 'adventures',
+  },
+  termsAccepted: {
+    type: Boolean,
+    required: true
+  },
+  smsConsent: {
+    type: Boolean,
+    default: false
   },
   password: {
     type: String,
