@@ -12,7 +12,7 @@ const sendVerificationEmail = async (email, verificationCode) => {
 
 const signupUser = async (req, res) => {
     try {
-        const { fullName, email, username, mobileNumber, userType } = req.body;
+        const { fullName, email, username, mobileNumber, userType,termsAccepted,smsConsent } = req.body;
 
         const existingUser = await User.findOne({ $or: [{ email }, { username }] });
 
@@ -28,7 +28,7 @@ const signupUser = async (req, res) => {
             }
         }
 
-        const verificationCode = crypto.randomInt(1000, 9999).toString();
+        const verificationCode = Math.floor(1000 + Math.random() * 9000).toString();
         const verificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000);
 
         const newUser = new User({
@@ -37,6 +37,8 @@ const signupUser = async (req, res) => {
             username,
             mobileNumber,
             userType,
+            termsAccepted,
+            smsConsent,
             verificationCode,
             verificationCodeExpires,
         });
@@ -46,7 +48,7 @@ const signupUser = async (req, res) => {
 
         res.status(201).json({ message: 'Signup successful. Verification code sent your mail. After verification, you will be able to set your password' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error during signup', error: error.message });
+        res.status(500).json({ message:error.message });
     }
 }
 
@@ -71,7 +73,7 @@ const userVerify = async (req, res) => {
         user.isVerified = true;
         user.verificationCode = undefined;
         user.verificationCodeExpires = undefined;
-        await user.save();
+        await user.save({ validateBeforeSave: false });
 
         res.status(200).json({ message: 'Verification success. You can now create a password.' });
     } catch (error) {
@@ -120,7 +122,7 @@ const resendCode = async (req, res) => {
         if (user.verificationCodeExpires > Date.now()) {
             return res.status(400).json({ message: 'Verification code is still valid. Please check your email for the existing code.' });
         }
-        const newVerificationCode = crypto.randomInt(1000, 9999).toString();
+        const newVerificationCode = Math.floor(1000 + Math.random() * 9000).toString();
         const newVerificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000);
 
         user.verificationCode = newVerificationCode;
@@ -132,15 +134,20 @@ const resendCode = async (req, res) => {
 
         res.status(200).json({ message: 'New verification code sent successfully.' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error during resend verification code', error: error.message });
+        res.status(500).json({ message: error.message });
     }
 }
 
 const loginUser = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { username, password } = req.body;
 
-        const user = await User.findOne({ email });
+        const user = await User.findOne({
+            $or: [
+              { email: username },
+              { username: username }
+            ]
+          });
         if (!user) {
             return res.status(400).json({ message: 'User not found' });
         }
@@ -166,7 +173,7 @@ const loginUser = async (req, res) => {
             data: user
         });
     } catch (error) {
-        res.status(500).json({ message: 'Server error during login', error: error.message });
+        res.status(500).json({ message:error.message });
     }
 };
 
@@ -179,7 +186,7 @@ const forgate = async (req, res) => {
             return res.status(400).json({ message: 'User with this email does not exist' });
         }
 
-        const newVerificationCode = crypto.randomInt(1000, 9999).toString();
+        const newVerificationCode = Math.floor(1000 + Math.random() * 9000).toString();
         const newVerificationCodeExpires = new Date(Date.now() + 15 * 60 * 1000);
 
         user.verificationCode = newVerificationCode;
@@ -194,32 +201,9 @@ const forgate = async (req, res) => {
 
         res.status(200).json({ message: 'OTP sent to your email for password reset' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error during password reset request', error: error.message });
+        res.status(500).json({ message:error.message });
     }
 }
-
-const resetPassword = async (req, res) => {
-    try {
-        const { email, newPassword } = req.body;
-
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            return res.status(400).json({ message: 'User not found' });
-        }
-
-        const saltRounds = 10;
-        const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
-
-        user.password = hashedPassword;
-
-        await user.save();
-
-        res.status(200).json({ message: 'Password reset successfully. You can now log in with your new password.' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error during password reset', error: error.message });
-    }
-};
 
 const changePassword = async (req, res) => {
     try {
@@ -252,6 +236,5 @@ module.exports = {
     setPassword,
     loginUser,
     forgate,
-    resetPassword,
     changePassword
 }
