@@ -26,8 +26,42 @@ const addCatogries = async (req, res) => {
 
 const getCatogry = async (req, res) => {
     try {
-        const result = await Category.find();
-        res.status(200).json(result);
+        const { search, page, limit } = req.body;
+
+        const pageNumber = parseInt(page) || 1;
+        const pageSize = parseInt(limit) || 10;
+
+        const aggregation = [];
+
+        if (search) {
+            aggregation.push({
+                $match: { name: { $regex: search, $options: 'i' } }
+            });
+        }
+
+        aggregation.push({
+            $facet: {
+                data: [
+                    { $skip: (pageNumber - 1) * pageSize },
+                    { $limit: pageSize },
+                ],
+                totalCount: [
+                    { $count: 'count' }
+                ]
+            }
+        });
+
+        const result = await Category.aggregate(aggregation);
+
+        const total = result[0].totalCount[0] ? result[0].totalCount[0].count : 0;
+        const data = result[0].data;
+
+        res.status(200).json({
+            total,
+            data,
+            currentPage: pageNumber,
+            pageSize
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
