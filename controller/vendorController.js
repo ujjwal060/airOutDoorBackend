@@ -109,7 +109,7 @@ const sendEmailOTP = async (req, res) => {
   }
 }
 
-const verifyOTP = async (req, res) => {
+const verifyOTP = async (req, res) => { 
   const { email, otp } = req.body;
 
   try {
