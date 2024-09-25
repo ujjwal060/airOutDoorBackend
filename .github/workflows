@@ -1,0 +1,31 @@
+name: CI/CD Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Tests
+        env:
+          NODE_ENV: ${{ secrets.NODE_ENV }} 
+        run: npm test
+
+      - name: Deploy
+        env:
+          NODE_ENV: ${{ secrets.NODE_ENV }}  # Use your secret here for deployment
+        run: npm run deploy  # Adjust this to your deployment command
