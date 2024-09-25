@@ -6,6 +6,7 @@ const cors = require("cors");
 
 const apiRoutes = require("./apiRoutes");
 
+
 const app = express();
 const PORT = process.env.PORT || 8000;
 const MONGO_URL = process.env.MONGO_URL;
@@ -25,6 +26,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 
 app.use("/", apiRoutes);
+
 
 
 mongoose.set("strictQuery", false);
