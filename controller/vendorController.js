@@ -17,7 +17,7 @@ const createVendor = async (req, res) => {
 
     let profileImagePath = '';
     if (req.file) {
-      profileImagePath = req.file.path;
+      profileImagePath = req.file.location;
     }
 
     const newVendor = new Vendor({
@@ -169,7 +169,7 @@ const editProfile = async (req, res) => {
   try {
     const vendorId = req.params.id;
     const { name, phone, address, businessInfo } = req.body;
-    const profileImage = req.file ? req.file.path : null;
+    const profileImage = req.file ? req.file.location : null;
 
     const updatedVendor = await Vendor.findByIdAndUpdate(
       vendorId,
