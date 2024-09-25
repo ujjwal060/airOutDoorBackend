@@ -5,7 +5,7 @@ const addCatogries = async (req, res) => {
     try {
         const { name, parentCategory } = req.body;
 
-        const imageUrl = req.file.path;
+        const imageUrl = req.file.location;
 
         const category = new Category({
             name,
