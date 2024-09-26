@@ -10,7 +10,6 @@ const s3 = new S3({
   region: process.env.AWS_REGION,
 });
 
-// File filter to accept certain file types
 const fileFilter = (req, file, cb) => {
   const fileTypes = /jpeg|jpg|png|gif|mp4|mov/;
   const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
@@ -23,16 +22,14 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
-// Use multer memory storage
-const storage = multer.memoryStorage(); // Store files in memory
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: { fileSize: 1024 * 1024 * 10 },
-}).single('image'); // Accept one file at a time
+}).single('image');
 
-// Middleware to upload to S3
 const uploadToS3 = async (req, res, next) => {
   upload(req, res, async (err) => {
     if (err) {
@@ -43,15 +40,12 @@ const uploadToS3 = async (req, res, next) => {
       Bucket: process.env.AWS_S3_BUCKET_NAME,
       Key: `${Date.now()}-${req.file.originalname}`,
       Body: req.file.buffer,
-      // Remove the ACL property if your bucket does not allow it
-      // ACL: 'public-read', // Remove this line
     };
 
     try {
-      await s3.putObject(params); // Upload the file to S3
-      // Construct the URL manually
+      await s3.putObject(params); 
       req.fileLocation = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${params.Key}`;
-      next(); // Proceed to the next middleware
+      next();
     } catch (uploadError) {
       return res.status(500).send(uploadError.message);
     }
