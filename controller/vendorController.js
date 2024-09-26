@@ -17,7 +17,7 @@ const createVendor = async (req, res) => {
 
     let profileImagePath = '';
     if (req.file) {
-      profileImagePath = req.file.location;
+      profileImagePath = req.fileLocation;
     }
 
     const newVendor = new Vendor({

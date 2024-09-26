@@ -40,6 +40,7 @@ const uploadToS3 = async (req, res, next) => {
       Bucket: process.env.AWS_S3_BUCKET_NAME,
       Key: `${Date.now()}-${req.file.originalname}`,
       Body: req.file.buffer,
+      ContentType: req.file.mimetype,
     };
 
     try {
