@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const Vendor = require('../model/vendorModel');
-const sendEmail=require('../comman/sendEmail')
+const sendEmail=require('../comman/sendEmail');
+const property=require('../model/propertyModel');
+const User=require('../model/userModel');
 
 const login = async (req, res) => {
   try {
@@ -102,4 +104,93 @@ const allVendor=async(req,res)=>{
   }
 }
 
-module.exports = { login,vendorApprove,allVendor }
+const allUser=async(req,res)=>{
+  try {
+    const { search, page, limit } = req.body;
+
+    const pageNumber = page || 1;
+    const pageSize = limit || 10;
+
+    const aggregation = [];
+
+    if (search) {
+      aggregation.push({
+        $match: { name: { $regex: search, $options: 'i' } }
+      });
+    }
+
+    aggregation.push({
+      $facet: {
+        data: [
+          { $skip: (pageNumber - 1) * pageSize },
+          { $limit: pageSize },
+        ],
+        totalCount: [
+          { $count: 'count' }
+        ]
+      }
+    });
+
+    const results = await User.aggregate(aggregation);
+
+    const users = results[0].data;
+    const totalUsers = results[0].totalCount[0] ? results[0].totalCount[0].count : 0;
+    const totalPages = Math.ceil(totalUsers / pageSize);
+
+    res.json({
+      users,
+      totalUsers,
+      totalPages,
+      currentPage: pageNumber,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
+const allProoerty=async(req,res)=>{
+  try {
+    const { search, page, limit } = req.body;
+
+    const pageNumber = page || 1;
+    const pageSize = limit || 10;
+
+    const aggregation = [];
+
+    if (search) {
+      aggregation.push({
+        $match: { name: { $regex: search, $options: 'i' } }
+      });
+    }
+
+    aggregation.push({
+      $facet: {
+        data: [
+          { $skip: (pageNumber - 1) * pageSize },
+          { $limit: pageSize },
+        ],
+        totalCount: [
+          { $count: 'count' }
+        ]
+      }
+    });
+
+    const results = await property.aggregate(aggregation);
+
+    const data = results[0].data;
+    const total = results[0].totalCount[0] ? results[0].totalCount[0].count : 0;
+    const totalPages = Math.ceil(total / pageSize);
+
+    res.json({
+      data,
+      total,
+      totalPages,
+      currentPage: pageNumber,
+    });
+  } catch (error) {
+    res.status(500).json({ error:error.message});
+  }
+}
+
+module.exports = { login,vendorApprove,allVendor,allProoerty,allUser }
