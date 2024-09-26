@@ -75,10 +75,27 @@ const deleteProperty = async (req, res) => {
   }
 }
 
+const getfeaturedProperty=async(req,res)=>{
+  try {
+    const currentDate = new Date();
+    const featuredProperties = await Property.find({
+      // dateAvailable: { $gte: currentDate },
+    });
+
+    if (featuredProperties.length === 0) {
+      return res.status(404).json({ message: 'No featured properties found for today.' });
+    }
+
+    return res.status(200).json(featuredProperties);
+  } catch (error) {
+    return res.status(500).json({ message:error.message});
+  }
+}
 
 module.exports = {
   getProperties,
   addProperty,
   updateProperty,
   deleteProperty,
+  getfeaturedProperty
 }
