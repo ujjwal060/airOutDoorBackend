@@ -86,4 +86,21 @@ const deleteCatogry = async (req, res) => {
     }
 }
 
-module.exports = { addCatogries, getCatogry, deleteCatogry }
+const subCatogry = async (req, res) => {
+    try {
+        const {activeTab} = req.body;
+        const result = await Category.find({ parentCategory: activeTab });
+        res.status(200).json({ result })
+    } catch (error) {
+        res.status(500).json({ message: error.message })
+    }
+}
+
+module.exports =
+{
+    addCatogries,
+    getCatogry,
+    deleteCatogry,
+    subCatogry,
+    subCatogry
+}

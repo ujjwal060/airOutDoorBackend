@@ -3,7 +3,8 @@ const Property = require('../model/propertyModel')
 // Get all properties
 const getProperties = async (req, res) => {
   try {
-    const properties = await Property.find()
+    const {vendorId}=req.params;
+    const properties = await Property.find({vendorId:vendorId})
     res.json(properties)
   } catch (err) {
     res.status(500).json({ message: 'Error fetching properties' })
@@ -13,9 +14,11 @@ const getProperties = async (req, res) => {
 // Add new property
 const addProperty = async (req, res) => {
   try {
-    const { name, description, amenities, pricing, availability } = req.body
-    const imageUrl = req.file ? req.file.path : null
-
+    const { name, description, amenities, pricing, availability,vendorId } = req.body
+    let imageUrl ='';
+    if (req.file) {
+      imageUrl = req.fileLocation;
+    }
     const newProperty = new Property({
       name,
       description,
@@ -23,12 +26,13 @@ const addProperty = async (req, res) => {
       pricing,
       availability,
       imageUrl,
+      vendorId
     })
 
     await newProperty.save()
     res.status(201).json(newProperty)
   } catch (err) {
-    res.status(400).json({ message: 'Error adding property' })
+    res.status(400).json({ message: err.message })
   }
 }
 
@@ -71,10 +75,27 @@ const deleteProperty = async (req, res) => {
   }
 }
 
+const getfeaturedProperty=async(req,res)=>{
+  try {
+    const currentDate = new Date();
+    const featuredProperties = await Property.find({
+      // dateAvailable: { $gte: currentDate },
+    });
+
+    if (featuredProperties.length === 0) {
+      return res.status(404).json({ message: 'No featured properties found for today.' });
+    }
+
+    return res.status(200).json(featuredProperties);
+  } catch (error) {
+    return res.status(500).json({ message:error.message});
+  }
+}
 
 module.exports = {
   getProperties,
   addProperty,
   updateProperty,
   deleteProperty,
+  getfeaturedProperty
 }
