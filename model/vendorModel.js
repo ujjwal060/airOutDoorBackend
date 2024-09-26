@@ -29,7 +29,8 @@ const vendorSchema = new mongoose.Schema({
     required: true
   },
   profileImage:{
-    type:String
+    type:String,
+    required: false,
   },
   status: {
     type: String,

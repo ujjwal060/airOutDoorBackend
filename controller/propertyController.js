@@ -13,7 +13,7 @@ const getProperties = async (req, res) => {
 // Add new property
 const addProperty = async (req, res) => {
   try {
-    const { name, description, amenities, pricing, availability } = req.body
+    const { name, description, amenities, pricing, availability, vendorId } = req.body
     const imageUrl = req.file ? req.file.path : null
 
     const newProperty = new Property({
@@ -23,6 +23,7 @@ const addProperty = async (req, res) => {
       pricing,
       availability,
       imageUrl,
+      vendorId, // Ensure vendorId is included
     })
 
     await newProperty.save()
@@ -48,6 +49,7 @@ const updateProperty = async (req, res) => {
       pricing: req.body.pricing || property.pricing,
       availability: req.body.availability || property.availability,
       imageUrl: req.file ? req.file.path : property.imageUrl,
+      vendorId: req.body.vendorId || property.vendorId, // Update vendorId if provided
     }
 
     const updatedProperty = await Property.findByIdAndUpdate(req.params.id, updatedData, { new: true })
@@ -70,7 +72,6 @@ const deleteProperty = async (req, res) => {
     res.status(500).json({ message: 'Error deleting property' })
   }
 }
-
 
 module.exports = {
   getProperties,

@@ -10,7 +10,7 @@ const propertySchema = new mongoose.Schema({
   vendorId: {
     type: String,
     required: true,
-    unique: true
+    unique: true, // Adjust based on your requirements
   },
 })
 
