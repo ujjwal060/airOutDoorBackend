@@ -12,7 +12,7 @@ const sendVerificationEmail = async (email, verificationCode) => {
 
 const signupUser = async (req, res) => {
     try {
-        const { fullName, email, username, mobileNumber, userType,termsAccepted,smsConsent } = req.body;
+        const { fullName, email, username, mobileNumber, userType, termsAccepted, smsConsent } = req.body;
 
         const existingUser = await User.findOne({ $or: [{ email }, { username }] });
 
@@ -48,7 +48,7 @@ const signupUser = async (req, res) => {
 
         res.status(201).json({ message: 'Signup successful. Verification code sent your mail. After verification, you will be able to set your password' });
     } catch (error) {
-        res.status(500).json({ message:error.message });
+        res.status(500).json({ message: error.message });
     }
 }
 
@@ -144,10 +144,10 @@ const loginUser = async (req, res) => {
 
         const user = await User.findOne({
             $or: [
-              { email: username },
-              { username: username }
+                { email: username },
+                { username: username }
             ]
-          });
+        });
         if (!user) {
             return res.status(400).json({ message: 'User not found' });
         }
@@ -173,7 +173,7 @@ const loginUser = async (req, res) => {
             data: user
         });
     } catch (error) {
-        res.status(500).json({ message:error.message });
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -201,7 +201,7 @@ const forgate = async (req, res) => {
 
         res.status(200).json({ message: 'OTP sent to your email for password reset' });
     } catch (error) {
-        res.status(500).json({ message:error.message });
+        res.status(500).json({ message: error.message });
     }
 }
 
@@ -228,7 +228,17 @@ const changePassword = async (req, res) => {
     }
 }
 
-
+const getUser = async (req, res) => {
+    try {
+        const {userId}=req.params;
+        const result=await User.findById(userId);
+        res.status(200).json({
+            data:result
+        })
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
 module.exports = {
     signupUser,
     userVerify,
@@ -236,5 +246,6 @@ module.exports = {
     setPassword,
     loginUser,
     forgate,
-    changePassword
+    changePassword,
+    getUser
 }

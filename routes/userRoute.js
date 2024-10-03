@@ -6,7 +6,8 @@ const {
     setPassword,
     loginUser,
     forgate,
-    changePassword } = require('../controller/userController');
+    changePassword,
+    getUser } = require('../controller/userController');
 const router = express.Router();
 
 
@@ -17,6 +18,7 @@ router.post('/login', loginUser);
 router.post('/sendOTP', resendCode);
 router.post('/forgate', forgate);
 router.put('/changePassword/:id', changePassword);
+router.get('/getUser/:userId',getUser);
 
 
 module.exports = router;
