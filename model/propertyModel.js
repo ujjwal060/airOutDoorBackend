@@ -9,8 +9,7 @@ const propertySchema = new mongoose.Schema({
   imageUrl: { type: [String] },
   vendorId: {
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
 })
 
