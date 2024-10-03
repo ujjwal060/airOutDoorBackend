@@ -14,7 +14,7 @@ const getProperties = async (req, res) => {
 // Add new property
 const addProperty = async (req, res) => {
   try {
-    const { name, description, amenities, pricing, availability,vendorId } = req.body
+    const { name, description, amenities, pricing, availability,vendorId,category } = req.body
     let imageUrl ='';
     if (req.file) {
       imageUrl = req.fileLocation;
@@ -26,6 +26,7 @@ const addProperty = async (req, res) => {
       pricing,
       availability,
       imageUrl,
+      category ,
       vendorId
     })
 
@@ -51,7 +52,9 @@ const updateProperty = async (req, res) => {
       amenities: req.body.amenities || property.amenities,
       pricing: req.body.pricing || property.pricing,
       availability: req.body.availability || property.availability,
+      category: req.body.category || property.category,
       imageUrl: req.file ? req.file.path : property.imageUrl,
+      
     }
 
     const updatedProperty = await Property.findByIdAndUpdate(req.params.id, updatedData, { new: true })
