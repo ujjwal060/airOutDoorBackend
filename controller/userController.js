@@ -207,18 +207,13 @@ const forgate = async (req, res) => {
 
 const changePassword = async (req, res) => {
     try {
-        const { oldPassword, newPassword } = req.body;
-        const userId = req.params;
-        if (!oldPassword || !newPassword) {
-            return res.status(400).send('Old password and new password are required');
-        }
-        const users = await User.findById(userId);
-        if (!users) return res.status(404).send('Vendor not found');
+        const {password } = req.body;
+        const {userId} = req.params;
 
-        const isPasswordValid = await bcrypt.compare(oldPassword, users.password);
-        if (!isPasswordValid) return res.status(400).send('Old password is incorrect');
+        const users = await User.findById({_id:userId});
+        if (!users) return res.status(404).send({message:'user not found'});
 
-        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        const hashedPassword = await bcrypt.hash(password, 10);
         users.password = hashedPassword;
 
         await users.save();
@@ -230,15 +225,50 @@ const changePassword = async (req, res) => {
 
 const getUser = async (req, res) => {
     try {
-        const {userId}=req.params;
-        const result=await User.findById(userId);
+        const { userId } = req.params;
+        const result = await User.findById(userId);
         res.status(200).json({
-            data:result
+            data: result
         })
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
 }
+
+const updateProfile = async (req, res) => {
+    const userId = req.params.userid;
+    const { fullName, username, email, mobileNumber, about, place, lang, website, skype, facebook, instagram, linkedin, youtube } = req.body;
+
+    try {
+        let imageUrl = '';
+        if (req.file) {
+            imageUrl = req.fileLocation;
+        }
+        const updatedUser = await User.findByIdAndUpdate(userId, {
+            fullName,
+            username,
+            email,
+            mobileNumber,
+            about,
+            place,
+            lang,
+            website,
+            skype,
+            facebook,
+            instagram,
+            linkedin,
+            youtube,
+            imageUrl
+        }, { new: true });
+
+        res.status(200).json({ message: "your profile updated", updatedUser });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+
+}
+
+
 module.exports = {
     signupUser,
     userVerify,
@@ -247,5 +277,6 @@ module.exports = {
     loginUser,
     forgate,
     changePassword,
-    getUser
+    getUser,
+    updateProfile
 }

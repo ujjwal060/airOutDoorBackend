@@ -59,6 +59,45 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  imageUrl: {
+    type: String
+  },
+  about: {
+    type: String,
+    trim: true,
+  },
+  place: {
+    type: String,
+    trim: true,
+  },
+  lang: {
+    type: String,
+    trim: true,
+  },
+  website: {
+    type: String,
+    trim: true,
+  },
+  skype: {
+    type: String,
+    trim: true,
+  },
+  facebook: {
+    type: String,
+    trim: true,
+  },
+  instagram: {
+    type: String,
+    trim: true,
+  },
+  linkedin: {
+    type: String,
+    trim: true,
+  },
+  youtube: {
+    type: String,
+    trim: true,
+  },
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
