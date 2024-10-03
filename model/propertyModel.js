@@ -7,10 +7,11 @@ const propertySchema = new mongoose.Schema({
   pricing: { type: String, required: true },
   availability: { type: String, required: true },
   imageUrl: { type: [String] },
+  category: { type: String, required: true },
   vendorId: {
     type: String,
     required: true,
-    unique: true
+
   },
 })
 
