@@ -5,14 +5,13 @@ const propertySchema = new mongoose.Schema({
   description: { type: String, required: true },
   amenities: { type: String, required: true },
   pricing: { type: String, required: true },
-  availability: { type: String, required: true },
+  startDate: { type: Date, required: true },  // Date type for start date
+  endDate: { type: Date, required: true },    // Date type for end date
   imageUrl: { type: [String] },
   category: { type: String, required: true },
-  vendorId: {
-    type: String,
-    required: true,
-  },
-})
+  vendorId: { type: String, required: true },
+});
 
-const Property = mongoose.model('Property', propertySchema)
-module.exports = Property
+const Property = mongoose.model('Property', propertySchema);
+module.exports = Property;
+

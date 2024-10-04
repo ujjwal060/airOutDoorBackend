@@ -14,36 +14,37 @@ const getProperties = async (req, res) => {
 // Add new property
 const addProperty = async (req, res) => {
   try {
-    const { name, description, amenities, pricing, availability,vendorId,category } = req.body
-    let imageUrl ='';
+    const { name, description, amenities, pricing, startDate, endDate, vendorId, category } = req.body;
+    let imageUrl = '';
     if (req.file) {
-      imageUrl = req.fileLocation;
+      imageUrl = req.file.path; // Use multer's file path
     }
+    
     const newProperty = new Property({
       name,
       description,
       amenities,
       pricing,
-      availability,
+      startDate: new Date(startDate),  // Convert to Date object
+      endDate: new Date(endDate),      // Convert to Date object
       imageUrl,
-      category ,
+      category,
       vendorId
-    })
+    });
 
-    await newProperty.save()
-    res.status(201).json(newProperty)
+    await newProperty.save();
+    res.status(201).json(newProperty);
   } catch (err) {
-    res.status(400).json({ message: err.message })
+    res.status(400).json({ message: err.message });
   }
 }
 
 // Update property
 const updateProperty = async (req, res) => {
   try {
-    const property = await Property.findById(req.params.id)
-
+    const property = await Property.findById(req.params.id);
     if (!property) {
-      return res.status(404).json({ message: 'Property not found' })
+      return res.status(404).json({ message: 'Property not found' });
     }
 
     const updatedData = {
@@ -51,18 +52,19 @@ const updateProperty = async (req, res) => {
       description: req.body.description || property.description,
       amenities: req.body.amenities || property.amenities,
       pricing: req.body.pricing || property.pricing,
-      availability: req.body.availability || property.availability,
+      startDate: req.body.startDate ? new Date(req.body.startDate) : property.startDate, // Date handling
+      endDate: req.body.endDate ? new Date(req.body.endDate) : property.endDate, // Date handling
       category: req.body.category || property.category,
-      imageUrl: req.file ? req.file.path : property.imageUrl,
-      
-    }
+      imageUrl: req.file ? req.file.path : property.imageUrl, // Handle image upload
+    };
 
-    const updatedProperty = await Property.findByIdAndUpdate(req.params.id, updatedData, { new: true })
-    res.json(updatedProperty)
+    const updatedProperty = await Property.findByIdAndUpdate(req.params.id, updatedData, { new: true });
+    res.json(updatedProperty);
   } catch (err) {
-    res.status(500).json({ message: 'Error updating property' })
+    res.status(500).json({ message: 'Error updating property' });
   }
-}
+};
+
 
 // Delete property
 const deleteProperty = async (req, res) => {
