@@ -5,7 +5,7 @@ const router = express.Router();
 
 router.post('/book',bookProperty);
 router.get('/book/:userId',getBookingByUser);
-router.get('/getBook/:vendorId',getBookingByUser);
+router.get('/getBook/:vendorId',getBooking);
 
 
 module.exports = router;

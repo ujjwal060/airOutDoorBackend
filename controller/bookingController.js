@@ -27,7 +27,7 @@ const bookProperty = async (req, res) => {
 const getBooking = async (req, res) => {
     try {
         const vendorId = req.params.vendorId;
-        const bookings = await booking.find({ vendorId });
+        const bookings = await booking.find({ vendorId:vendorId });
 
         if (!bookings.length) {
             return res.status(404).json({ message: 'No bookings found for this user.' });
