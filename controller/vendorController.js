@@ -16,8 +16,8 @@ const createVendor = async (req, res) => {
     const vendorId = `V-${nextVendorNumber.toString().padStart(3, '0')}`;
 
     let profileImagePath = '';
-    if (req.file) {
-      profileImagePath = req.fileLocation;
+    if (req.fileLocations) {
+      profileImagePath = req.fileLocations[0];
     }
 
     const newVendor = new Vendor({

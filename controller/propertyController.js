@@ -1,6 +1,5 @@
 const Property = require('../model/propertyModel')
 
-// Get all properties
 const getProperties = async (req, res) => {
   try {
     const {vendorId}=req.params;
@@ -11,13 +10,12 @@ const getProperties = async (req, res) => {
   }
 }
 
-// Add new property
 const addProperty = async (req, res) => {
   try {
     const { name, description, amenities, pricing, startDate, endDate, vendorId, category } = req.body;
-    let imageUrl = '';
-    if (req.file) {
-      imageUrl = req.file.path; // Use multer's file path
+    let imageUrl = [];
+    if (req.fileLocations) {
+      imageUrl = req.fileLocations;
     }
     
     const newProperty = new Property({
@@ -25,8 +23,8 @@ const addProperty = async (req, res) => {
       description,
       amenities,
       pricing,
-      startDate: new Date(startDate),  // Convert to Date object
-      endDate: new Date(endDate),      // Convert to Date object
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
       imageUrl,
       category,
       vendorId
@@ -39,7 +37,6 @@ const addProperty = async (req, res) => {
   }
 }
 
-// Update property
 const updateProperty = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id);
@@ -52,10 +49,10 @@ const updateProperty = async (req, res) => {
       description: req.body.description || property.description,
       amenities: req.body.amenities || property.amenities,
       pricing: req.body.pricing || property.pricing,
-      startDate: req.body.startDate ? new Date(req.body.startDate) : property.startDate, // Date handling
-      endDate: req.body.endDate ? new Date(req.body.endDate) : property.endDate, // Date handling
+      startDate: req.body.startDate ? new Date(req.body.startDate) : property.startDate,
+      endDate: req.body.endDate ? new Date(req.body.endDate) : property.endDate,
       category: req.body.category || property.category,
-      imageUrl: req.file ? req.file.path : property.imageUrl, // Handle image upload
+      imageUrl: req.fileLocation ? req.fileLocation : property.imageUrl,
     };
 
     const updatedProperty = await Property.findByIdAndUpdate(req.params.id, updatedData, { new: true });
@@ -66,7 +63,6 @@ const updateProperty = async (req, res) => {
 };
 
 
-// Delete property
 const deleteProperty = async (req, res) => {
   try {
     const property = await Property.findByIdAndDelete(req.params.id)
@@ -75,7 +71,6 @@ const deleteProperty = async (req, res) => {
     }
     res.json({ message: 'Property deleted successfully' })
   } catch (err) {
-    console.error(err)  // Log the error to help debug
     res.status(500).json({ message: 'Error deleting property' })
   }
 }
