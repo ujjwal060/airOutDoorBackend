@@ -16,7 +16,7 @@ const addProperty = async (req, res) => {
     let imageUrl = [];
     if (req.fileLocations) {
       imageUrl = req.fileLocations;
-    }
+    } 
     
     const newProperty = new Property({
       name,
