@@ -5,6 +5,7 @@ const userauthRoute=require('./routes/userRoute');
 const catogriesRoute=require('./routes/catogriesRoute');
 const propertyRoutes =require('./routes/propertyRoutes');
 const bookingRoutes=require('./routes/bookingRoute')
+const reviewRoute=require('./routes/reviewRoute')
 
 const router = express.Router();
 
@@ -15,5 +16,6 @@ router.use("/user", userauthRoute);
 router.use("/catogries", catogriesRoute);
 router.use("/property", propertyRoutes);
 router.use('/booking',bookingRoutes);
+router.use('/review',reviewRoute);
 
 module.exports = router;
