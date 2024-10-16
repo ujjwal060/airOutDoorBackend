@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 
-const verufyToken=async(req,res)=>{
+const verifyToken =async(req,res,next)=>{
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
   
@@ -9,8 +9,9 @@ const verufyToken=async(req,res)=>{
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
       if (err) return res.status(403).json({ message: 'Invalid token' });
   
-      res.json({ message: 'Token is valid', user });
+      res.status(200).json({ message: 'Token is valid',user });
+      next();
     });
 }
 
-module.exports = {verufyToken};
+module.exports = {verifyToken };

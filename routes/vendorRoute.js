@@ -1,5 +1,5 @@
 const express = require('express');
-const {verufyToken}=require('../middleware/verifyToken')
+const {verifyToken}=require('../middleware/verifyToken')
 const {createVendor,login,sendEmailOTP,resetPassword,editProfile,changePassword,verifyOTP} = require('../controller/vendorController');
 const {uploadToS3}=require('../comman/multerConfig');
 const Vendor = require('../model/vendorModel');
@@ -11,7 +11,7 @@ router.post('/login', login);
 router.post('/sendOTP', sendEmailOTP);
 router.post('/verifyOTP', verifyOTP);
 router.post('/forgate', resetPassword);
-router.put('/profile/:id',verufyToken, uploadToS3, editProfile);
+router.put('/profile/:id',verifyToken, uploadToS3, editProfile);
 router.put('/changePassword/:id',changePassword);
 
 router.get('/vendor/:vendorId', async (req, res) => {
