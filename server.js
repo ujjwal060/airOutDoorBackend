@@ -4,8 +4,11 @@ const mongoose = require("mongoose");
 const bodyParser = require('body-parser');
 const cors = require("cors");
 
+const apiRoutes = require("./apiRoutes");
+
+
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 const MONGO_URL = process.env.MONGO_URL;
 
 const corsOptions = {
@@ -17,11 +20,15 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+app.use('/uploads', express.static('uploads'));
 
 app.use(express.json());
 app.use(bodyParser.json());
 
-// Connect to MongoDB
+app.use("/", apiRoutes);
+
+
+
 mongoose.set("strictQuery", false);
 mongoose
   .connect(MONGO_URL)
