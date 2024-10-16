@@ -45,13 +45,7 @@ const listingSchema = new mongoose.Schema({
       price: { type: Number },
     },
   ],
-  images: [
-    {
-      url: String,
-      description: String,
-    },
-  ],
-
+  images: { type: [String] },
   details: {
     acreage: {
       type: Number,

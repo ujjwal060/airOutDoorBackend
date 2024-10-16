@@ -2,9 +2,8 @@ const submitProperty = require('../model/submitPropertyModel');
 
 const addProperty = async (req, res) => {
     try {
-        // Extracting data from req.body
         const {
-            propery_nickname,       // Typo corrected from propertyNickname
+            propery_nickname,
             category,
             property_description,
             instant_booking,
@@ -28,14 +27,13 @@ const addProperty = async (req, res) => {
             checkOut
         } = req.body;
 
-        // Creating a new listing object with parsed and structured data
         const newListing = new submitProperty({
             propertyNickname: propery_nickname,
             category,
             propertyDescription: property_description,
             instantBooking: instant_booking,
-            priceRange, // Already structured as an object
-            images, // Assuming the images are sent as an array
+            priceRange,
+            images,
             propertyName: property_name,
             acreage,
             guidedHunt: guided_hunt,
@@ -58,17 +56,30 @@ const addProperty = async (req, res) => {
             }
         });
 
-        // Saving the new listing to the database
         const savedListing = await newListing.save();
         res.status(200).json(savedListing);
 
     } catch (error) {
-        // Sending error response
         res.status(400).json({ message: error.message });
     }
 };
 
+const getProperty = async (req, res) => {
+    try {
+        const data = await submitProperty.find();
+        res.status(200).json({
+            message: 'data get',
+            data:data,
+            status:200
+        });
+
+    } catch (error) {
+        res.status(400).json({ message: error.message });
+    }
+}
+
 module.exports =
 {
-    addProperty
+    addProperty,
+    getProperty
 }
