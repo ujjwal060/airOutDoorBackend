@@ -209,4 +209,13 @@ const changePassword = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 }
-module.exports = { createVendor, login, sendEmailOTP, resetPassword, editProfile,verifyOTP, changePassword }
+
+const getAll=async(req,res)=>{
+  try{
+    const data=await Vendor.find();
+    res.status(200).json({message:"get all vendor",data:data})
+  }catch(error){
+    res.status(500).json({ message: error.message });
+  }
+}
+module.exports = { createVendor, login, sendEmailOTP, resetPassword, editProfile,verifyOTP, changePassword,getAll }
