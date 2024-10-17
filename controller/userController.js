@@ -241,8 +241,8 @@ const updateProfile = async (req, res) => {
 
     try {
         let imageUrl = '';
-        if (req.file) {
-            imageUrl = req.fileLocation;
+        if (req.fileLocations) {
+            imageUrl = req.fileLocations[0];
         }
         const updatedUser = await User.findByIdAndUpdate(userId, {
             fullName,
