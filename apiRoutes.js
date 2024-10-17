@@ -4,8 +4,9 @@ const vendorauthRoute = require("./routes/vendorRoute");
 const userauthRoute=require('./routes/userRoute');
 const catogriesRoute=require('./routes/catogriesRoute');
 const propertyRoutes =require('./routes/propertyRoutes');
-const bookingRoutes=require('./routes/bookingRoute')
-const reviewRoute=require('./routes/reviewRoute')
+const bookingRoutes=require('./routes/bookingRoute');
+const submitProperty=require('./routes/submitPropertyRoute');
+const favorites=require('./routes/favoriteRoute');
 
 const router = express.Router();
 
@@ -16,6 +17,7 @@ router.use("/user", userauthRoute);
 router.use("/catogries", catogriesRoute);
 router.use("/property", propertyRoutes);
 router.use('/booking',bookingRoutes);
-router.use('/review',reviewRoute);
+router.use('/host',submitProperty);
+router.use('/fav',favorites);
 
 module.exports = router;
