@@ -18,7 +18,7 @@ router.get('/getAll',getAll);
 router.get('/vendor/:vendorId', async (req, res) => {
     const { vendorId } = req.params;
     try {
-        console.log(`Received request for vendor ID: ${vendorId}`); // Log the vendor ID
+        console.log(`Received request for vendor ID: ${vendorId}`); 
         const vendor = await Vendor.findOne({ vendorId });
         if (!vendor) {
             return res.status(404).json({ message: 'Vendor not found' });
