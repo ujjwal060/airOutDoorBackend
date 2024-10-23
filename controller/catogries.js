@@ -9,18 +9,17 @@ const addCatogries = async (req, res) => {
             return res.status(400).json({ message: 'Category with this name already exists.' });
         }
 
-        const imageUrl = req.fileLocation;
+        const imageUrl = req.fileLocations;
 
         const category = new Category({
             name,
-            image: imageUrl,
+            image: imageUrl
         });
 
         await category.save();
 
-        res.status(201).json({
-            message: 'Category created successfully!',
-            category,
+        res.status(200).json({
+            message: 'Category created successfully!'
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
