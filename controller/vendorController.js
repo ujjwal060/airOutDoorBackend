@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const Vendor = require('../model/vendorModel');
 const sendEmail = require('../comman/sendEmail');
+const Users=require('../model/userModel');
 
 const createVendor = async (req, res) => {
   const { name, email, password, phone, address } = req.body;
@@ -218,4 +219,15 @@ const getAll=async(req,res)=>{
     res.status(500).json({ message: error.message });
   }
 }
-module.exports = { createVendor, login, sendEmailOTP, resetPassword, editProfile,verifyOTP, changePassword,getAll }
+
+const getUsers=async(req,res)=>{
+  try{
+    const {userIds}=req.body;
+    const data = await Users.find({ _id: { $in: userIds } }).select('fullName imageUrl _id');
+    res.status(200).json({message:"get all users",data:data})
+  }catch(error){
+    res.status(500).json({ message: error.message });
+  }
+}
+
+module.exports = { createVendor, login, sendEmailOTP, resetPassword, editProfile,verifyOTP, changePassword,getAll,getUsers }
