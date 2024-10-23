@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const listingSchema = new mongoose.Schema({
+
   propertyNickname: {
     type: String,
     // required: true,
@@ -15,8 +16,8 @@ const listingSchema = new mongoose.Schema({
     // required: true,
   },
   instantBooking: {
-    type: Boolean,
-    default: false,
+    type: String,
+    // default: false,
   },
   priceRange: {
     min: {
@@ -45,7 +46,12 @@ const listingSchema = new mongoose.Schema({
       price: { type: Number },
     },
   ],
-  images: { type: [String] },
+
+  // images: { 
+  //   type: [String] 
+  // },
+
+
   details: {
     acreage: {
       type: Number,
@@ -61,7 +67,7 @@ const listingSchema = new mongoose.Schema({
     },
     lodging: {
       type: String,
-      enum: [],
+      // enum: [],
       // required: true,
     },
     shootingRange: {
@@ -72,10 +78,11 @@ const listingSchema = new mongoose.Schema({
       type: String,
     },
     instantBooking: {
-      type: Boolean,
-      default: false,
+      type: String,
+      // default: false,
     },
   },
+  
 
   location: {
     address: {
@@ -112,6 +119,8 @@ const listingSchema = new mongoose.Schema({
       },
     ],
   },
+
+
   isApproveByAdmin: {
     type: Boolean,
     default: false
