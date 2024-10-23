@@ -9,7 +9,7 @@ const addCatogries = async (req, res) => {
             return res.status(400).json({ message: 'Category with this name already exists.' });
         }
 
-        const imageUrl = req.fileLocations;
+        const imageUrl = req.fileLocations[0];
 
         const category = new Category({
             name,
