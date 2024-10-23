@@ -14,7 +14,7 @@ router.post('/forgate', resetPassword);
 router.put('/profile/:id',verifyToken, uploadToS3, editProfile);
 router.put('/changePassword/:id',changePassword);
 router.get('/getAll',getAll);
-router.get('/getUsers',getUsers);
+router.post('/getUsers',getUsers);
 
 
 router.get('/vendor/:vendorId', async (req, res) => {

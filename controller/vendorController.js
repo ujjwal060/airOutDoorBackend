@@ -222,7 +222,8 @@ const getAll=async(req,res)=>{
 
 const getUsers=async(req,res)=>{
   try{
-    const data=await Users.find();
+    const {userIds}=req.body;
+    const data = await Users.find({ _id: { $in: userIds } }).select('fullName imageUrl _id');
     res.status(200).json({message:"get all users",data:data})
   }catch(error){
     res.status(500).json({ message: error.message });
