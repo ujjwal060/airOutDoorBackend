@@ -4,6 +4,10 @@ const Category = require('../model/catogriesModel');
 const addCatogries = async (req, res) => {
     try {
         const { name } = req.body;
+        const existingCategory = await Category.findOne({ name });
+        if (existingCategory) {
+            return res.status(400).json({ message: 'Category with this name already exists.' });
+        }
 
         const imageUrl = req.fileLocation;
 
