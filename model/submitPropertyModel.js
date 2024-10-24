@@ -7,7 +7,6 @@ const listingSchema = new mongoose.Schema({
   },
   category: {
     type: String,
-    enum: [],
     // required: true,
   },
   propertyDescription: {

@@ -8,7 +8,6 @@ const addProperty = async (req, res) => {
             property_description,
             instant_booking,
             priceRange,
-            images,
             property_name,
             acreage,
             guided_hunt,
@@ -27,13 +26,17 @@ const addProperty = async (req, res) => {
             checkOut
         } = req.body;
 
+        let imageUrl = [];
+        if (req.fileLocations) {
+            imageUrl = req.fileLocations;
+        }
         const newListing = new submitProperty({
             propertyNickname: propery_nickname,
             category,
             propertyDescription: property_description,
             instantBooking: instant_booking,
             priceRange,
-            images,
+            images:imageUrl,
             propertyName: property_name,
             acreage,
             guidedHunt: guided_hunt,
@@ -69,8 +72,8 @@ const getProperty = async (req, res) => {
         const data = await submitProperty.find();
         res.status(200).json({
             message: 'data get',
-            data:data,
-            status:200
+            data: data,
+            status: 200
         });
 
     } catch (error) {
