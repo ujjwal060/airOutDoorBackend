@@ -7,6 +7,7 @@ const propertyRoutes =require('./routes/propertyRoutes');
 const bookingRoutes=require('./routes/bookingRoute');
 const submitProperty=require('./routes/submitPropertyRoute');
 const favorites=require('./routes/favoriteRoute');
+const contactus=require('./routes/contactRoute');
 
 const router = express.Router();
 
@@ -19,5 +20,6 @@ router.use("/property", propertyRoutes);
 router.use('/booking',bookingRoutes);
 router.use('/host',submitProperty);
 router.use('/fav',favorites);
+router.use('/contact',contactus);
 
 module.exports = router;
