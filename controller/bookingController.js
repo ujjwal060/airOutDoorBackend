@@ -1,5 +1,7 @@
 const booking = require('../model/bookingModel');
 const property = require('../model/propertyModel');
+const userModel=require('../model/userModel');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const bookProperty = async (req, res) => {
     try {
@@ -98,9 +100,79 @@ const getAllBookings = async (req, res) => {
     }
 }
 
+const payment = async (req, res) => {
+    const { amount, token, userId, bookingId,vendorId } = req.body;
+   
+    try {
+        const user = await userModel.findById(userId).select('email');
+        if (!user) {
+            return res.status(400).json({ success: false, message: 'User not found' });
+        }
+        const email = user.email
+        const customers = await stripe.customers.list({
+            limit: 100,
+        });
+
+        let customer = customers.data.find(cust => cust.metadata.userId === userId);
+
+        if (!customer) {
+            customer = await stripe.customers.create({
+                email: email,
+                description: `Customer for User ID: ${userId}`,
+                metadata: { userId: userId, bookingId: bookingId, vendorId: vendorId },
+                source: token,
+            });
+        }
+
+        const paymentMethod = await stripe.paymentMethods.create({
+            type: 'card',
+            card: { token: token },
+        });
+
+        await stripe.paymentMethods.attach(paymentMethod.id, { customer: customer.id });
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(parseFloat(amount) * 100),
+            currency: 'usd',
+            customer: customer.id,
+            payment_method: paymentMethod.id,
+            off_session: true,
+            confirm: true,
+            metadata: { userId: userId, bookingId: bookingId, vendorId: vendorId },
+        });
+
+        if (paymentIntent.status === 'succeeded') {
+            await booking.findByIdAndUpdate(bookingId, {
+                paymentStatus: 'paid',
+                paymentIntentId: paymentIntent.id,
+            });
+
+            res.json({
+                status: 200,
+                message: "Payment Successful",
+                data: {
+                    amount,
+                    bookingId,
+                    paymentIntentId: paymentIntent.id
+                }
+            });
+        } else {
+            await booking.findByIdAndDelete(bookingId);
+
+            res.status(400).json({
+                success: false,
+                message: "Payment Failed."
+            });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+
 module.exports = {
     bookProperty,
     getBooking,
     getBookingByUser,
-    getAllBookings // Export the new controller
+    getAllBookings,
+    payment
 }
