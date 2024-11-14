@@ -40,6 +40,15 @@ const bookingSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  paymentStatus: {
+    type: String,
+    enum: ['paid', 'pending', 'failed'],
+    default: 'pending',
+  },
+  paymentIntentId: {
+    type: String,
+    required: false,
+  },
 });
 
 module.exports = mongoose.model('Booking', bookingSchema);
