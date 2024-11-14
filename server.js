@@ -3,8 +3,10 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require('body-parser');
 const cors = require("cors");
+const cron = require('node-cron');
 
 const apiRoutes = require("./apiRoutes");
+const {calculateAndInitializePayouts} = require('./controller/payoutController');
 
 
 const app = express();
@@ -27,7 +29,9 @@ app.use(bodyParser.json());
 
 app.use("/", apiRoutes);
 
-
+cron.schedule('* * * * *', async () => {
+  await calculateAndInitializePayouts();
+});
 
 mongoose.set("strictQuery", false);
 mongoose
