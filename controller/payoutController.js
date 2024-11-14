@@ -13,7 +13,17 @@ const calculateAndInitializePayouts = async () => {
         });
         aggregation.push({
             $addFields: {
-                totalAmountNumeric: { $toDouble: { $substr: ["$totalAmount", 1, -1] } }
+                totalAmount: { $trim: { input: "$totalAmount" } } // Optional, to remove any spaces
+            }
+        });
+        aggregation.push({
+            $addFields: {
+                totalAmountNumeric: { $toDouble: { $substrBytes: ["$totalAmount", 1, { $strLenBytes: "$totalAmount" }] } }
+            }
+        });
+        aggregation.push({
+            $match: {
+                vendorId: { $ne: null }
             }
         });
         aggregation.push({
@@ -22,6 +32,7 @@ const calculateAndInitializePayouts = async () => {
                 totalAmount: { $sum: "$totalAmountNumeric" },
             }
         });
+        
         const vendorBookings = await bookingModel.aggregate(aggregation);
 
         for (const vendor of vendorBookings) {
