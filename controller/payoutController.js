@@ -91,6 +91,25 @@ const getAllPayout = async (req, res) => {
     }
 }
 
+const getPayouthistoryByVendor=async(req,res)=>{
+    const { vendorId } = req.params;
+
+    try {
+        const payoutRecord = await payoutModel.findOne({ vendorId });
+    
+        if (!payoutRecord) {
+          return res.status(404).json({ message: 'Payout record not found for this vendor' });
+        }
+    
+        res.status(200).json({
+          payouts: payoutRecord.payouts,
+          remainingAmount: payoutRecord.remainingAmount,
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching payouts' });
+      }
+}
 
 
-module.exports = { calculateAndInitializePayouts, getAllPayout };
+module.exports = { calculateAndInitializePayouts, getAllPayout,getPayouthistoryByVendor };
