@@ -32,7 +32,7 @@ const calculateAndInitializePayouts = async () => {
                 totalAmount: { $sum: "$totalAmountNumeric" },
             }
         });
-        
+
         const vendorBookings = await bookingModel.aggregate(aggregation);
 
         for (const vendor of vendorBookings) {
@@ -91,47 +91,59 @@ const getAllPayout = async (req, res) => {
     }
 }
 
-const getPayouthistoryByVendor=async(req,res)=>{
+const getPayouthistoryByVendor = async (req, res) => {
     const { vendorId } = req.params;
 
     try {
         const payoutRecord = await payoutModel.findOne({ vendorId });
-    
+
         if (!payoutRecord) {
-          return res.status(404).json({ message: 'Payout record not found for this vendor' });
+            return res.status(404).json({ message: 'Payout record not found for this vendor' });
         }
-    
+
         res.status(200).json({
-          payouts: payoutRecord.payouts,
-          remainingAmount: payoutRecord.remainingAmount,
+            cashoutRequests: payoutRecord.cashoutRequests,
+            remainingAmount: payoutRecord.remainingAmount
         });
-      } catch (error) {
+    } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Error fetching payouts' });
-      }
+    }
 }
 
-const cashoutRequest=async(req,res)=>{
+const cashoutRequest = async (req, res) => {
     const { vendorId, amountRequested, stripeAccountId } = req.body;
 
-  try {
-    const payout = await payoutModel.findOne({ vendorId });
+    try {
+        const payout = await payoutModel.findOne({ vendorId });
 
-    if (amountRequested <= 0 || amountRequested > payout.remainingAmount) {
-      return res.status(400).json({ success: false, message: 'Invalid cashout amount' });
+        if (!payout) {
+            return res.status(404).json({ success: false, message: 'Payout record not found' });
+        }
+
+        if (amountRequested <= 0 || amountRequested > payout.remainingAmount) {
+            return res.status(400).json({ success: false, message: 'Invalid cashout amount' });
+        }
+
+        const newCashoutRequest = {
+            amountRequested,
+            stripeAccountId,
+            requestDate: new Date(),
+            status: 'pending',
+        };
+
+        payout.cashoutRequests.push(newCashoutRequest);
+
+        await payout.save();
+
+        res.json({
+            success: true,
+            message: 'Cashout request successful',
+            cashoutRequest: newCashoutRequest,
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
-
-    payout.remainingAmount -= amountRequested;
-
-    payout.cashoutRequests.push({ amountRequested, stripeAccountId });
-
-    await payout.save();
-
-    res.json({ success: true, message: 'Cashout request successful' });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message:error.message});
-  }
 }
 
-module.exports = { calculateAndInitializePayouts, getAllPayout,getPayouthistoryByVendor,cashoutRequest };
+module.exports = { calculateAndInitializePayouts, getAllPayout, getPayouthistoryByVendor, cashoutRequest };
