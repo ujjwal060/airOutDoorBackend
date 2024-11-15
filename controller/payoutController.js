@@ -111,5 +111,27 @@ const getPayouthistoryByVendor=async(req,res)=>{
       }
 }
 
+const cashoutRequest=async(req,res)=>{
+    const { vendorId, amountRequested, stripeAccountId } = req.body;
 
-module.exports = { calculateAndInitializePayouts, getAllPayout,getPayouthistoryByVendor };
+  try {
+    const payout = await payoutModel.findOne({ vendorId });
+
+    if (amountRequested <= 0 || amountRequested > payout.remainingAmount) {
+      return res.status(400).json({ success: false, message: 'Invalid cashout amount' });
+    }
+
+    payout.remainingAmount -= amountRequested;
+
+    payout.cashoutRequests.push({ amountRequested, stripeAccountId });
+
+    await payout.save();
+
+    res.json({ success: true, message: 'Cashout request successful' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message:error.message});
+  }
+}
+
+module.exports = { calculateAndInitializePayouts, getAllPayout,getPayouthistoryByVendor,cashoutRequest };

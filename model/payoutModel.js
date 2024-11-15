@@ -3,13 +3,20 @@ const mongoose = require('mongoose');
 const payoutSchema = new mongoose.Schema(
     {
         vendorId: { type: String, ref: 'Vendor' },
-        payouts: [
+        remainingAmount: { type: Number, required: true },
+        cashoutRequests: [
             {
-                amountPaid: { type: Number, required: true },
-                paymentDate: { type: Date, default: Date.now },
+                amountRequested: { type: Number, required: true },
+                requestDate: { type: Date, default: Date.now },
+                stripeAccountId: { type: String, required: true },
+                status: {
+                    type: String,
+                    enum: ['pending', 'paid', 'rejected'],
+                    default: 'pending',
+                },
+                paymentDate: { type: Date },
             }
-        ],
-        remainingAmount: { type: Number, required: true }
+        ]
     }
 );
 
