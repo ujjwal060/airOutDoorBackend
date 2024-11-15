@@ -91,6 +91,47 @@ const getAllPayout = async (req, res) => {
     }
 }
 
+const getPayouthistoryByVendor=async(req,res)=>{
+    const { vendorId } = req.params;
 
+    try {
+        const payoutRecord = await payoutModel.findOne({ vendorId });
+    
+        if (!payoutRecord) {
+          return res.status(404).json({ message: 'Payout record not found for this vendor' });
+        }
+    
+        res.status(200).json({
+          payouts: payoutRecord.payouts,
+          remainingAmount: payoutRecord.remainingAmount,
+        });
+      } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Error fetching payouts' });
+      }
+}
 
-module.exports = { calculateAndInitializePayouts, getAllPayout };
+const cashoutRequest=async(req,res)=>{
+    const { vendorId, amountRequested, stripeAccountId } = req.body;
+
+  try {
+    const payout = await payoutModel.findOne({ vendorId });
+
+    if (amountRequested <= 0 || amountRequested > payout.remainingAmount) {
+      return res.status(400).json({ success: false, message: 'Invalid cashout amount' });
+    }
+
+    payout.remainingAmount -= amountRequested;
+
+    payout.cashoutRequests.push({ amountRequested, stripeAccountId });
+
+    await payout.save();
+
+    res.json({ success: true, message: 'Cashout request successful' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message:error.message});
+  }
+}
+
+module.exports = { calculateAndInitializePayouts, getAllPayout,getPayouthistoryByVendor,cashoutRequest };
