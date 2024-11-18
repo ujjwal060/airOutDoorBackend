@@ -86,7 +86,11 @@ const getfeaturedProperty=async(req,res)=>{
       return res.status(404).json({ message: 'No featured properties found for today.' });
     }
 
-    return res.status(200).json(featuredProperties);
+    return res.status(200).json({
+      status:200,
+      message:"get all",
+      data:featuredProperties
+    });
   } catch (error) {
     return res.status(500).json({ message:error.message});
   }

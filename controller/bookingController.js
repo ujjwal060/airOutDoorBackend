@@ -69,7 +69,11 @@ const getBookingByUser = async (req, res) => {
             })
         );
 
-        return res.status(200).json(bookingsWithProperties);
+        return res.status(200).json({
+            status:200,
+            message:"get booking",
+            data:bookingsWithProperties
+        });
     } catch (error) {
         return res.status(500).json({ message: 'An error occurred while fetching bookings.' });
     }

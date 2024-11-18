@@ -30,7 +30,11 @@ const getFav = async (req, res) => {
             };
         });
 
-        res.status(200).json(formattedFavorites);
+        res.status(200).json({
+            status:200,
+            message:"get all",
+            data:formattedFavorites
+        });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
