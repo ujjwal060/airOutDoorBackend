@@ -5,6 +5,10 @@ const listingSchema = new mongoose.Schema({
     type: String,
     // required: true,
   },
+  propertyName: {
+    type: String,
+    // required: true,
+  },
   category: {
     type: String,
     // required: true,

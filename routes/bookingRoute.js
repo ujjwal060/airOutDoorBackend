@@ -9,4 +9,5 @@ router.get('/getBook/:vendorId',getBooking);
 router.get('/getBooking',getAllBookings);
 router.post('/payment',payment);
 
+
 module.exports = router;

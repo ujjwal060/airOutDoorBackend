@@ -23,5 +23,6 @@ router.use('/host',submitProperty);
 router.use('/fav',favorites);
 router.use('/contact',contactus);
 router.use('/payouts',payouts);
+router.use('/blogs',payouts);
 
 module.exports = router;
