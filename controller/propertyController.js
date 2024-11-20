@@ -2,8 +2,8 @@ const Property = require('../model/propertyModel')
 
 const getProperties = async (req, res) => {
   try {
-    const {vendorId}=req.params;
-    const properties = await Property.find({vendorId:vendorId})
+    const { vendorId } = req.params;
+    const properties = await Property.find({ vendorId: vendorId })
     res.json(properties)
   } catch (err) {
     res.status(500).json({ message: 'Error fetching properties' })
@@ -11,31 +11,93 @@ const getProperties = async (req, res) => {
 }
 
 const addProperty = async (req, res) => {
+
   try {
-    const { name, description, amenities, pricing, startDate, endDate, vendorId, category } = req.body;
+    const {
+      vendorId,
+      property_nickname,
+      category,
+      property_description,
+      instant_booking,
+      priceRange,
+      property_name,
+      acreage,
+      guided_hunt,
+      guest_limit,
+      lodging,
+      shooting_range,
+      extended_details,
+      address,
+      city,
+      zip_code,
+      state,
+      country,
+      latitude,
+      longitude,
+      checkIn,
+      checkOut,
+      groupPrice,
+      groupSize
+    } = req.body;
+
+
+    const parsedPriceRange = JSON.parse(priceRange);
+
     let imageUrl = [];
     if (req.fileLocations) {
       imageUrl = req.fileLocations;
     }
-    
-    const newProperty = new Property({
-      name,
-      description,
-      amenities,
-      pricing,
-      startDate: new Date(startDate),
-      endDate: new Date(endDate),
-      imageUrl,
+    const newListing = new Property({
+      vendorId: vendorId,
+      propertyNickname: property_nickname,
       category,
-      vendorId
+      propertyDescription: property_description,
+      priceRange: {
+        min: parseInt(parsedPriceRange.min),
+        max: parseInt(parsedPriceRange.max),
+      },
+      details: {
+        instantBooking: instant_booking,
+        acreage,
+        guidedHunt: guided_hunt,
+        guestLimitPerDay: guest_limit,
+        lodging,
+        shootingRange: shooting_range,
+        optionalExtendedDetails: extended_details,
+      },
+      images: imageUrl,
+      propertyName: property_name,
+      acreage,
+      guidedHunt: guided_hunt,
+      guestLimit: guest_limit,
+      lodging,
+      shootingRange: shooting_range,
+      extendedDetails: extended_details,
+      location: {
+        address,
+        city,
+        zipCode: zip_code,
+        state,
+        country,
+        latitude,
+        longitude,
+      },
+      startDate: checkIn,
+      endDate: checkOut,
+      pricePerGroupSize: {
+        groupPrice: groupPrice,
+        groupSize: groupSize
+      }
     });
 
-    await newProperty.save();
-    res.status(201).json(newProperty);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
+    const savedListing = await newListing.save();
+    res.status(200).json(savedListing);
+
+  } catch (error) {
+    console.log("Error while adding property:", error);
+    res.status(401).json({ message: error.message });
   }
-}
+};
 
 const updateProperty = async (req, res) => {
   try {
@@ -75,7 +137,7 @@ const deleteProperty = async (req, res) => {
   }
 }
 
-const getfeaturedProperty=async(req,res)=>{
+const getfeaturedProperty = async (req, res) => {
   try {
     const currentDate = new Date();
     const featuredProperties = await Property.find({
@@ -87,12 +149,12 @@ const getfeaturedProperty=async(req,res)=>{
     }
 
     return res.status(200).json({
-      status:200,
-      message:"get all",
-      data:featuredProperties
+      status: 200,
+      message: "get all",
+      data: featuredProperties
     });
   } catch (error) {
-    return res.status(500).json({ message:error.message});
+    return res.status(500).json({ message: error.message });
   }
 }
 
