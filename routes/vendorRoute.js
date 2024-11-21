@@ -20,7 +20,7 @@ router.post('/getUsers',getUsers);
 router.get('/vendor/:vendorId', async (req, res) => {
     const { vendorId } = req.params;
     try {
-        console.log(`Received request for vendor ID: ${vendorId}`); // Log the vendor ID
+        //console(`Received request for vendor ID: ${vendorId}`); // Log the vendor ID
         const vendor = await Vendor.findOne({ vendorId });
         if (!vendor) {
             return res.status(404).json({ message: 'Vendor not found' });

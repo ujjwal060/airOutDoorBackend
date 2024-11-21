@@ -84,7 +84,7 @@ const addProperty = async (req, res) => {
     res.status(200).json(savedListing);
 
   } catch (error) {
-    console.log("Error while adding property:", error);
+    //console("Error while adding property:", error);
     res.status(401).json({ message: error.message });
   }
 };

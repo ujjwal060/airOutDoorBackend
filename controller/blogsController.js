@@ -13,7 +13,7 @@ const createBlog = async (req, res) => {
         title,description,image:imageUrl
     })
     const updatedBlogList=await newBlog.save({new:true})
-    console.log("updated blog list",updatedBlogList)
+    //console("updated blog list",updatedBlogList)
     res.status(200).json({
         success:true,
         message:"Blog created Successfully",

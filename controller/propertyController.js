@@ -94,7 +94,7 @@ const addProperty = async (req, res) => {
     const savedListing = await newListing.save();
     res.status(200).json(savedListing);
   } catch (error) {
-    console.log("Error while adding property:", error);
+    //console("Error while adding property:", error);
     res.status(401).json({ message: error.message });
   }
 };
@@ -133,7 +133,7 @@ const updateProperty = async (req, res) => {
 const deleteProperty = async (req, res) => {
   try {
     const propertyId = req.params.id;
-    console.log(propertyId);
+    //console(propertyId);
     if (!propertyId) {
       return res.status(400).json({ message: "Property ID is required" });
     }
@@ -193,7 +193,6 @@ const getfeaturedProperty = async (req, res) => {
 const favouriteproperty = async (req, res) => {
   const { propertyId, isFavorite } = req.body;
   try {
-    // Find the property by ID and update its favorite status
     const property = await Property.findById(propertyId);
     if (!property) {
       return res.status(404).send("Property not found");
@@ -204,14 +203,14 @@ const favouriteproperty = async (req, res) => {
 
     res.status(200).send({ message: "Favorite status updated successfully" });
   } catch (error) {
-    console.log(error);
+    //console(error);
     res.status(500).send("Error updating favorite status");
   }
 };
 const getFavoriteProperty = async (req, res) => {
   try {
     const favProperty = await Property.find({ isFavorite: true });
-    console.log("favorite properties", favProperty);
+    //console("favorite properties", favProperty);
     res.status(200).json({
       success: true,
       favProperty,
