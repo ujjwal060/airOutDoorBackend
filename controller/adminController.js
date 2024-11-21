@@ -160,7 +160,7 @@ const allProoerty=async(req,res)=>{
 
     if (search) {
       aggregation.push({
-        $match: { name: { $regex: search, $options: 'i' } }
+        $match: { propertyName: { $regex: search, $options: 'i' } }
       });
     }
 
