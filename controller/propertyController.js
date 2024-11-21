@@ -1,4 +1,5 @@
 const Property = require('../model/propertyModel')
+const Category = require('../model/catogriesModel')
 
 const getProperties = async (req, res) => {
   try {
@@ -65,7 +66,7 @@ const addProperty = async (req, res) => {
         lodging,
         shootingRange: shooting_range,
         optionalExtendedDetails: extended_details,
-        guestPricePerDay:guest_perPrice
+        guestPricePerDay: guest_perPrice
       },
       images: imageUrl,
       propertyName: property_name,
@@ -142,19 +143,28 @@ const deleteProperty = async (req, res) => {
 
 const getfeaturedProperty = async (req, res) => {
   try {
-    const currentDate = new Date();
-    const featuredProperties = await Property.find({
-      // dateAvailable: { $gte: currentDate },
+    const featuredProperties = await Property.find()
+    .populate({
+      path: 'category',
+      select: 'name',
     });
-
     if (featuredProperties.length === 0) {
       return res.status(404).json({ message: 'No featured properties found for today.' });
     }
 
+    const result = await Promise.all(featuredProperties.map(async (property) => {
+      const category = await Category.findById(property.category);
+      
+      return {
+        ...property.toObject(),
+        category: category ? category.name : null 
+      };
+    }));
+
     return res.status(200).json({
       status: 200,
       message: "get all",
-      data: featuredProperties
+      data: result
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
