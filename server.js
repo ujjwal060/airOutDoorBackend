@@ -31,7 +31,7 @@ app.use(bodyParser.json());
 
 app.use("/", apiRoutes);
 
-cron.schedule('* * * * *', async () => {
+cron.schedule('*/10 * * * * *', async () => {
   await calculateAndInitializePayouts();
 });
 
