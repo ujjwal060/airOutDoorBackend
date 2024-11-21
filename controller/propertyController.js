@@ -37,7 +37,8 @@ const addProperty = async (req, res) => {
       checkIn,
       checkOut,
       groupPrice,
-      groupSize
+      groupSize,
+      guest_perPrice
     } = req.body;
 
 
@@ -64,6 +65,7 @@ const addProperty = async (req, res) => {
         lodging,
         shootingRange: shooting_range,
         optionalExtendedDetails: extended_details,
+        guestPricePerDay:guest_perPrice
       },
       images: imageUrl,
       propertyName: property_name,

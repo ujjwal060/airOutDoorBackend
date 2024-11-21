@@ -56,7 +56,7 @@ const propertySchema = new mongoose.Schema({
     },
     guestPricePerDay: {
       type: Number,
-      // required: true,
+      required: true,
     },
     lodging: {
       type: String,
