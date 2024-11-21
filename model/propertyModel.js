@@ -83,15 +83,15 @@ const propertySchema = new mongoose.Schema({
     },
     city: {
       type: String,
-      required: true,
+      // required: true,
     },
     state: {
       type: String,
-      required: true,
+      // required: true,
     },
     postalCode: {
       type: String,
-      required: true,
+      // required: true,
     },
     latitude: {
       type: Number,
