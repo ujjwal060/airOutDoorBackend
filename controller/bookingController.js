@@ -62,20 +62,31 @@ const getBookingByUser = async (req, res) => {
         const bookingsWithProperties = await Promise.all(
             bookings.map(async (booking) => {
                 const propertyData = await property.findById(booking.propertyId);
+
+                if (!propertyData) {
+                    return {
+                        ...booking._doc,
+                        propertyDetails: null,
+                    };
+                }
+
                 return {
                     ...booking._doc,
-                    propertyDetails: propertyData
+                    propertyDetails: {
+                        name: propertyData.propertyName,
+                        images: propertyData.images,
+                    }
                 };
             })
         );
 
         return res.status(200).json({
-            status:200,
-            message:"get booking",
-            data:bookingsWithProperties
+            status: 200,
+            message: "Get bookings successfully.",
+            data: bookingsWithProperties
         });
-    } catch (error) {
-        return res.status(500).json({ message: 'An error occurred while fetching bookings.' });
+    }catch (error) {
+        return res.status(500).json({ message:error.message});
     }
 }
 

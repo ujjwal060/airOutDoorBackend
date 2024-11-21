@@ -1,4 +1,5 @@
 const favorite = require('../model/favoriteModel');
+const Category = require('../model/catogriesModel');
 
 const addFav = async (req, res) => {
     const { userId, propertyId } = req.body;
@@ -30,10 +31,19 @@ const getFav = async (req, res) => {
             };
         });
 
+        const result = await Promise.all(formattedFavorites.map(async (property) => {
+            const category = await Category.findById(property.category);
+
+            return {
+                ...property,
+                category: category ? category.name : property.category 
+            };
+        }));
+
         res.status(200).json({
-            status:200,
-            message:"get all",
-            data:formattedFavorites
+            status: 200,
+            message: "get all",
+            data: result
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
