@@ -128,6 +128,7 @@ const updateProperty = async (req, res) => {
 
 
 const deleteProperty = async (req, res) => {
+  console.log(req.body)
   try {
     const property = await Property.findByIdAndDelete(req.params.id)
     if (!property) {
