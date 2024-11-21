@@ -39,13 +39,13 @@ mongoose.set("strictQuery", false);
 mongoose
   .connect(MONGO_URL)
   .then(() => {
-    //console("Connected to MongoDB");
+    console.log("Connected to MongoDB");
     app.listen(PORT, () => {
-      //console(`Node API app is running on port ${PORT}`);
+      console.log(`Node API app is running on port ${PORT}`);
     });
   })
   .catch((error) => {
-    //console(error);
+    console.log(error);
   });
 
 module.exports = app;

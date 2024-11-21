@@ -160,23 +160,31 @@ const deleteProperty = async (req, res) => {
 
 const getfeaturedProperty = async (req, res) => {
   try {
-    const featuredProperties = await Property.find()
-    .populate({
-      path: 'category',
-      select: 'name',
-    });
+    const { categoryId } = req.body;
+
+    let query = {}
+
+    if (categoryId) {
+      query = { category: categoryId };
+    }
+
+    const featuredProperties = await Property.find(query)
+      .populate({
+        path: 'category',
+        select: 'name',
+      });
     if (featuredProperties.length === 0) {
       return res
         .status(404)
-        .json({ message: "No featured properties found for today." });
+        .json({ status:404,message: "No featured properties found for today." });
     }
 
     const result = await Promise.all(featuredProperties.map(async (property) => {
       const category = await Category.findById(property.category);
-      
+
       return {
         ...property.toObject(),
-        category: category ? category.name : null 
+        category: category ? category.name : null
       };
     }));
 
@@ -218,11 +226,12 @@ const getFavoriteProperty = async (req, res) => {
     });
   } catch (error) {
     res.status(501).json({
-      success:false,
-      message:"Cant fetch Favourite Properties"
+      success: false,
+      message: "Cant fetch Favourite Properties"
     })
   }
 };
+
 module.exports = {
   getProperties,
   addProperty,

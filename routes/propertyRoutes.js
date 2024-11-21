@@ -11,6 +11,6 @@ router.put('/update/:id', uploadToS3, updateProperty);
 router.delete('/delete/:id', deleteProperty);
 router.post('/favorite', favouriteproperty);
 router.get('/getfavorite', getFavoriteProperty);
-router.get('/featured',getfeaturedProperty);
+router.post('/featured',getfeaturedProperty);
 
 module.exports = router
