@@ -5,31 +5,21 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const calculateAndInitializePayouts = async () => {
     try {
         const aggregation = []
-
         aggregation.push({
             $match: {
-                totalAmount: { $regex: /^\$\d+(\.\d+)?$/ }
+                vendorId: { $ne: null },
+                totalAmount: { $type: "string" }
             }
         });
         aggregation.push({
             $addFields: {
-                totalAmount: { $trim: { input: "$totalAmount" } } // Optional, to remove any spaces
-            }
-        });
-        aggregation.push({
-            $addFields: {
-                totalAmountNumeric: { $toDouble: { $substrBytes: ["$totalAmount", 1, { $strLenBytes: "$totalAmount" }] } }
-            }
-        });
-        aggregation.push({
-            $match: {
-                vendorId: { $ne: null }
+                totalAmountNumeric: { $toDouble: "$totalAmount" }
             }
         });
         aggregation.push({
             $group: {
                 _id: "$vendorId",
-                totalAmount: { $sum: "$totalAmountNumeric" },
+                totalAmount: { $sum: "$totalAmountNumeric" }
             }
         });
 
@@ -79,7 +69,7 @@ const getAllPayout = async (req, res) => {
                 }
             }
         ]);
-        
+
         res.status(200).json({
             status: 200,
             data: allPay
@@ -149,36 +139,36 @@ const cashoutRequest = async (req, res) => {
 
 const approvePayout = async (req, res) => {
     const { payoutRequestId, vendorId, amountRequested } = req.body;
-  
-    try {
-      const payout = await payoutModel.findOne({ 'cashoutRequests._id': payoutRequestId, vendorId });
-      
-      if (!payout) {
-        return res.status(404).json({ message: 'Payout request not found' });
-      }
-  
-      const payoutRequest = payout.cashoutRequests.id(payoutRequestId);
-  
-      if (payoutRequest.status !== 'pending') {
-        return res.status(400).json({ message: 'Payout request has already been processed' });
-      }
-  
-      const transfer = await stripe.transfers.create({
-        amount: amountRequested * 100,
-        currency: 'usd',
-        destination: payoutRequest.stripeAccountId,
-        description: `Payout for Vendor ${vendorId}`,
-      });
-  
-      payoutRequest.status = 'paid';
-      payoutRequest.paymentDate = new Date();
-      
-      await payout.save();
-  
-      res.status(200).json({ message: 'Payout approved and payment sent', transfer });
-    } catch (error) {
-      res.status(500).json({ message: 'Error processing payout', error: error.message });
-    }
-  };
 
-module.exports = { calculateAndInitializePayouts, getAllPayout, getPayouthistoryByVendor, cashoutRequest,approvePayout };
+    try {
+        const payout = await payoutModel.findOne({ 'cashoutRequests._id': payoutRequestId, vendorId });
+
+        if (!payout) {
+            return res.status(404).json({ message: 'Payout request not found' });
+        }
+
+        const payoutRequest = payout.cashoutRequests.id(payoutRequestId);
+
+        if (payoutRequest.status !== 'pending') {
+            return res.status(400).json({ message: 'Payout request has already been processed' });
+        }
+
+        const transfer = await stripe.transfers.create({
+            amount: amountRequested * 100,
+            currency: 'usd',
+            destination: payoutRequest.stripeAccountId,
+            description: `Payout for Vendor ${vendorId}`,
+        });
+
+        payoutRequest.status = 'paid';
+        payoutRequest.paymentDate = new Date();
+
+        await payout.save();
+
+        res.status(200).json({ message: 'Payout approved and payment sent', transfer });
+    } catch (error) {
+        res.status(500).json({ message: 'Error processing payout', error: error.message });
+    }
+};
+
+module.exports = { calculateAndInitializePayouts, getAllPayout, getPayouthistoryByVendor, cashoutRequest, approvePayout };
