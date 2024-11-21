@@ -32,10 +32,6 @@ const propertySchema = new mongoose.Schema({
       required: true,
     },
   },
-  guestPricePerDay: {
-    type: Number,
-    required: true,
-  },
   cancellationPolicy: {
     type: String,
   },
@@ -57,6 +53,10 @@ const propertySchema = new mongoose.Schema({
     guestLimitPerDay: {
       type: Number,
       required: true,
+    },
+    guestPricePerDay: {
+      type: Number,
+      // required: true,
     },
     lodging: {
       type: String,
