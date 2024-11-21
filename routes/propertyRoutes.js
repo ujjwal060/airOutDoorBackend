@@ -1,5 +1,5 @@
 const express = require('express')
-const { getProperties, addProperty, updateProperty, deleteProperty,getfeaturedProperty } = require('../controller/propertyController')
+const { getProperties, addProperty, updateProperty, deleteProperty,getfeaturedProperty, favouriteproperty, getFavoriteProperty } = require('../controller/propertyController')
 const {uploadToS3}=require('../comman/multerConfig');
 
 
@@ -9,6 +9,8 @@ router.get('/get/:vendorId', getProperties);
 router.post('/post', uploadToS3, addProperty);
 router.put('/update/:id', uploadToS3, updateProperty);
 router.delete('/delete/:id', deleteProperty);
+router.post('/favorite', favouriteproperty);
+router.get('/getfavorite', getFavoriteProperty);
 router.get('/featured',getfeaturedProperty);
 
 module.exports = router

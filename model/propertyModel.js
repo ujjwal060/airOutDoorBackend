@@ -48,6 +48,7 @@ const propertySchema = new mongoose.Schema({
     },
     guidedHunt: {
       type: String,
+      // enum:["Yes","No","Optional"],
       required: true,
     },
     guestLimitPerDay: {
@@ -95,11 +96,11 @@ const propertySchema = new mongoose.Schema({
     },
     latitude: {
       type: Number,
-      required: true,
+      // required: true,
     },
     longitude: {
       type: Number,
-      required: true,
+      // required: true,
     },
   },
   startDate: { type: Date },
@@ -108,7 +109,7 @@ const propertySchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  isFavourite: {
+  isFavorite: {
     type: Boolean,
     require: false,
     default: false

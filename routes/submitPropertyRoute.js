@@ -7,6 +7,6 @@ const router = express.Router();
 
 router.post('/add',uploadToS3, addProperty);
 router.get('/getProperty',getProperty)
-router.post('/deleteProperty',deleteProperty)
+router.delete('/delete-property/:id', deleteProperty);
 
 module.exports = router;

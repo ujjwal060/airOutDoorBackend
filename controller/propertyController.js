@@ -1,17 +1,16 @@
-const Property = require('../model/propertyModel')
+const Property = require("../model/propertyModel");
 
 const getProperties = async (req, res) => {
   try {
     const { vendorId } = req.params;
-    const properties = await Property.find({ vendorId: vendorId })
-    res.json(properties)
+    const properties = await Property.find({ vendorId: vendorId });
+    res.json(properties);
   } catch (err) {
-    res.status(500).json({ message: 'Error fetching properties' })
+    res.status(500).json({ message: "Error fetching properties" });
   }
-}
+};
 
 const addProperty = async (req, res) => {
-
   try {
     const {
       vendorId,
@@ -38,9 +37,8 @@ const addProperty = async (req, res) => {
       checkOut,
       groupPrice,
       groupSize,
-      guest_perPrice
+      guest_perPrice,
     } = req.body;
-
 
     const parsedPriceRange = JSON.parse(priceRange);
 
@@ -65,7 +63,7 @@ const addProperty = async (req, res) => {
         lodging,
         shootingRange: shooting_range,
         optionalExtendedDetails: extended_details,
-        guestPricePerDay:guest_perPrice
+        guestPricePerDay: guest_perPrice,
       },
       images: imageUrl,
       propertyName: property_name,
@@ -88,13 +86,12 @@ const addProperty = async (req, res) => {
       endDate: checkOut,
       pricePerGroupSize: {
         groupPrice: groupPrice,
-        groupSize: groupSize
-      }
+        groupSize: groupSize,
+      },
     });
 
     const savedListing = await newListing.save();
     res.status(200).json(savedListing);
-
   } catch (error) {
     console.log("Error while adding property:", error);
     res.status(401).json({ message: error.message });
@@ -105,7 +102,7 @@ const updateProperty = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id);
     if (!property) {
-      return res.status(404).json({ message: 'Property not found' });
+      return res.status(404).json({ message: "Property not found" });
     }
 
     const updatedData = {
@@ -113,32 +110,52 @@ const updateProperty = async (req, res) => {
       description: req.body.description || property.description,
       amenities: req.body.amenities || property.amenities,
       pricing: req.body.pricing || property.pricing,
-      startDate: req.body.startDate ? new Date(req.body.startDate) : property.startDate,
+      startDate: req.body.startDate
+        ? new Date(req.body.startDate)
+        : property.startDate,
       endDate: req.body.endDate ? new Date(req.body.endDate) : property.endDate,
       category: req.body.category || property.category,
       imageUrl: req.fileLocation ? req.fileLocation : property.imageUrl,
     };
 
-    const updatedProperty = await Property.findByIdAndUpdate(req.params.id, updatedData, { new: true });
+    const updatedProperty = await Property.findByIdAndUpdate(
+      req.params.id,
+      updatedData,
+      { new: true }
+    );
     res.json(updatedProperty);
   } catch (err) {
-    res.status(500).json({ message: 'Error updating property' });
+    res.status(500).json({ message: "Error updating property" });
   }
 };
 
-
 const deleteProperty = async (req, res) => {
-  console.log(req.body)
   try {
-    const property = await Property.findByIdAndDelete(req.params.id)
-    if (!property) {
-      return res.status(404).json({ message: 'Property not found' })
+    const propertyId = req.params.id;
+    console.log(propertyId);
+    if (!propertyId) {
+      return res.status(400).json({ message: "Property ID is required" });
     }
-    res.json({ message: 'Property deleted successfully' })
+
+    const deletedProperty = await Property.findByIdAndDelete(propertyId);
+    if (!deletedProperty) {
+      return res.status(404).json({ message: "Property not found" });
+    }
+
+    res.json({
+      message: "Property deleted successfully",
+      updatedProperty: deletedProperty,
+    });
+
+    res.json({
+      message: "Property deleted successfully",
+      updatedProperty: propertyId,
+    });
   } catch (err) {
-    res.status(500).json({ message: 'Error deleting property' })
+    console.error(err);
+    res.status(500).json({ message: "Error deleting property" });
   }
-}
+};
 
 const getfeaturedProperty = async (req, res) => {
   try {
@@ -148,23 +165,61 @@ const getfeaturedProperty = async (req, res) => {
     });
 
     if (featuredProperties.length === 0) {
-      return res.status(404).json({ message: 'No featured properties found for today.' });
+      return res
+        .status(404)
+        .json({ message: "No featured properties found for today." });
     }
 
     return res.status(200).json({
       status: 200,
       message: "get all",
-      data: featuredProperties
+      data: featuredProperties,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-}
+};
 
+const favouriteproperty = async (req, res) => {
+  const { propertyId, isFavorite } = req.body;
+  try {
+    // Find the property by ID and update its favorite status
+    const property = await Property.findById(propertyId);
+    if (!property) {
+      return res.status(404).send("Property not found");
+    }
+
+    property.isFavorite = isFavorite;
+    await property.save();
+
+    res.status(200).send({ message: "Favorite status updated successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send("Error updating favorite status");
+  }
+};
+const getFavoriteProperty = async (req, res) => {
+  try {
+    const favProperty = await Property.find({ isFavorite: true });
+    console.log("favorite properties", favProperty);
+    res.status(200).json({
+      success: true,
+      favProperty,
+      message: "fetched favourite Properties",
+    });
+  } catch (error) {
+    res.status(501).json({
+      success:false,
+      message:"Cant fetch Favourite Properties"
+    })
+  }
+};
 module.exports = {
   getProperties,
   addProperty,
   updateProperty,
   deleteProperty,
-  getfeaturedProperty
-}
+  favouriteproperty,
+  getfeaturedProperty,
+  getFavoriteProperty,
+};
