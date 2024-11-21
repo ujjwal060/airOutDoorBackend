@@ -1,22 +1,22 @@
 const mongoose = require('mongoose')
 
 const propertySchema = new mongoose.Schema({
-  vendorId: { type: String,}, //required: true },
+  vendorId: { type: String, required: true },
   propertyNickname: {
     type: String,
-    //required: true,
+    required: true,
   },
   propertyName: {
     type: String,
-    //required: true,
+    required: true,
   },
   category: {
     type: String,
-    //required: true,
+    required: true,
   },
   propertyDescription: {
     type: String,
-    //required: true,
+    required: true,
   },
   instantBooking: {
     type: Boolean,
@@ -25,16 +25,16 @@ const propertySchema = new mongoose.Schema({
   priceRange: {
     min: {
       type: Number,
-      //required: true,
+      required: true,
     },
     max: {
       type: Number,
-      //required: true,
+      required: true,
     },
   },
   guestPricePerDay: {
     type: Number,
-    //required: true,
+    required: true,
   },
   cancellationPolicy: {
     type: String,
@@ -48,24 +48,24 @@ const propertySchema = new mongoose.Schema({
   details: {
     acreage: {
       type: Number,
-      //required: true,
+      required: true,
     },
     guidedHunt: {
       type: String,
-      //required: true,
+      required: true,
     },
     guestLimitPerDay: {
       type: Number,
-      //required: true,
+      required: true,
     },
     lodging: {
       type: String,
       enum: [],
-      //required: true,
+      required: true,
     },
     shootingRange: {
       type: String,
-      //required: true,
+      required: true,
     },
     optionalExtendedDetails: {
       type: String,
@@ -79,27 +79,27 @@ const propertySchema = new mongoose.Schema({
   location: {
     address: {
       type: String,
-      //required: true,
+      required: true,
     },
     city: {
       type: String,
-      //required: true,
+      required: true,
     },
     state: {
       type: String,
-      //required: true,
+      required: true,
     },
     postalCode: {
       type: String,
-      //required: true,
+      required: true,
     },
     latitude: {
       type: Number,
-      //required: true,
+      required: true,
     },
     longitude: {
       type: Number,
-      //required: true,
+      required: true,
     },
   },
   startDate: { type: Date },
@@ -107,7 +107,16 @@ const propertySchema = new mongoose.Schema({
   isApproveByAdmin: {
     type: Boolean,
     default: false
-  }
+  },
+  isFavourite: {
+    type: Boolean,
+    require: false,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
 });
 
 
