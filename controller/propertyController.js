@@ -176,7 +176,7 @@ const getfeaturedProperty = async (req, res) => {
     if (featuredProperties.length === 0) {
       return res
         .status(404)
-        .json({ status:404,message: "No featured properties found for today." });
+        .json({ status:404,message: "No featured properties found for today.",data: featuredProperties });
     }
 
     const result = await Promise.all(featuredProperties.map(async (property) => {
