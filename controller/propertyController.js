@@ -133,7 +133,7 @@ const updateProperty = async (req, res) => {
 const deleteProperty = async (req, res) => {
   try {
     const propertyId = req.params.id;
-    //console(propertyId);
+
     if (!propertyId) {
       return res.status(400).json({ message: "Property ID is required" });
     }
@@ -143,14 +143,9 @@ const deleteProperty = async (req, res) => {
       return res.status(404).json({ message: "Property not found" });
     }
 
-    res.json({
+    return res.json({
       message: "Property deleted successfully",
       updatedProperty: deletedProperty,
-    });
-
-    res.json({
-      message: "Property deleted successfully",
-      updatedProperty: propertyId,
     });
   } catch (err) {
     console.error(err);
@@ -176,7 +171,7 @@ const getfeaturedProperty = async (req, res) => {
     if (featuredProperties.length === 0) {
       return res
         .status(404)
-        .json({ status:404,message: "No featured properties found for today.",data: featuredProperties });
+        .json({ status: 404, message: "No featured properties found for today.", data: featuredProperties });
     }
 
     const result = await Promise.all(featuredProperties.map(async (property) => {
