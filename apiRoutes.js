@@ -9,6 +9,7 @@ const submitProperty=require('./routes/submitPropertyRoute');
 const favorites=require('./routes/favoriteRoute');
 const contactus=require('./routes/contactRoute');
 const payouts=require('./routes/payoutRoute');
+const blogs=require('./routes/blogRoutes');
 
 const router = express.Router();
 
@@ -23,6 +24,6 @@ router.use('/host',submitProperty);
 router.use('/fav',favorites);
 router.use('/contact',contactus);
 router.use('/payouts',payouts);
-router.use('/blogs',payouts);
+router.use('/blogs',blogs);
 
 module.exports = router;
