@@ -22,7 +22,7 @@ const postContact = async (req, res) => {
 };
 const getAllContactUs = async (req, res) => {
   try {
-    const allContactUs = await contact.find();
+    const allContactUs = await contact.find().sort({createdAt:-1});
     if (!allContactUs) {
       return res.status(403).json({
         success: false,
