@@ -23,7 +23,7 @@ const sendNotification = async (req, res) => {
         } else {
             const recipients = await vendorModel.find().select('vendorId');
             mappedRecipients = recipients.map((recipient) => ({
-                userId: recipient.vendorId,
+                vendorId: recipient.vendorId,
                 isRead: false,
                 userType: role,
             }));

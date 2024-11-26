@@ -28,7 +28,7 @@ const notificationSchema = new mongoose.Schema({
   ],
   vendorRecipients: [
     {
-      vendorId: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor' },
+      vendorId: { type:String, ref: 'Vendor' },
       isRead: { type: Boolean, default: false },
     },
   ],
