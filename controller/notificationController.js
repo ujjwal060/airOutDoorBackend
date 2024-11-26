@@ -90,8 +90,33 @@ const getUserNotification = async (req, res) => {
     }
 }
 
+const notificationReadByUser = async (req, res) => {
+    const { id } = req.params;
+    const { userId } = req.body;
+
+    try {
+        const updatedNotification = await notification.findOneAndUpdate(
+            {
+                _id: id,
+                "recipients.userId": userId
+            },
+            { $set: { "recipients.$.isRead": true } },
+            { new: true }
+        );
+
+        if (!updatedNotification) {
+            return res.status(404).json({ message: 'Notification or recipient not found.' });
+        }
+
+        res.status(200).json({ message: 'Notification marked as read.', notification: updatedNotification });
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred.', error });
+    }
+}
+
 module.exports =
 {
     sendNotification,
-    getUserNotification
+    getUserNotification,
+    notificationReadByUser
 }
