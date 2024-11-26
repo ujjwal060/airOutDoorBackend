@@ -10,6 +10,7 @@ const favorites=require('./routes/favoriteRoute');
 const contactus=require('./routes/contactRoute');
 const payouts=require('./routes/payoutRoute');
 const blogs=require('./routes/blogRoutes');
+const notification=require('./routes/notificationRoute');
 
 const router = express.Router();
 
@@ -25,5 +26,7 @@ router.use('/fav',favorites);
 router.use('/contact',contactus);
 router.use('/payouts',payouts);
 router.use('/blogs',blogs);
+router.use('/notification',notification);
+
 
 module.exports = router;
