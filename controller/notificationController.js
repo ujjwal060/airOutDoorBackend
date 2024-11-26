@@ -1,6 +1,7 @@
 const notification = require('../model/notificationModel');
 const userModel = require('../model/userModel');
-const vendorModel=require("../model/vendorModel");
+const vendorModel = require("../model/vendorModel");
+const mongoose = require('mongoose');
 
 
 const sendNotification = async (req, res) => {
@@ -19,7 +20,7 @@ const sendNotification = async (req, res) => {
                 isRead: false,
                 userType: role,
             }));
-        }else{
+        } else {
             const recipients = await vendorModel.find().select('vendorId');
             mappedRecipients = recipients.map((recipient) => ({
                 userId: recipient.vendorId,
@@ -34,10 +35,10 @@ const sendNotification = async (req, res) => {
             role,
         });
 
-        if(role=='user'){
-            notifications.recipients= mappedRecipients;
-        }else{
-            notifications.vendorRecipients=mappedRecipients;
+        if (role == 'user') {
+            notifications.recipients = mappedRecipients;
+        } else {
+            notifications.vendorRecipients = mappedRecipients;
         }
         const savedNotification = await notifications.save();
 
@@ -47,7 +48,50 @@ const sendNotification = async (req, res) => {
     }
 }
 
+const getUserNotification = async (req, res) => {
+    const { userId, page = 1, limit = 10 } = req.body;
+    const skip = (page - 1) * limit;
+
+    try {
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+
+        const result = await notification.aggregate([
+            {
+                $match: {
+                    "recipients.userId": userObjectId
+                }
+            },
+            {
+                $facet: {
+                    notifications: [
+                        { $skip: skip },
+                        { $limit: limit }
+                    ],
+                    totalNotifications: [
+                        { $count: "count" }
+                    ]
+                }
+            }
+        ]);
+
+        const notifications = result[0].notifications || [];
+        const totalNotifications = result[0].totalNotifications[0]?.count || 0;
+        const totalPages = Math.ceil(totalNotifications / limit);
+
+        res.json({
+            notifications,
+            totalPages,
+            currentPage: page,
+            totalNotifications,
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+}
+
 module.exports =
 {
-    sendNotification
+    sendNotification,
+    getUserNotification
 }
