@@ -113,9 +113,78 @@ const notificationReadByUser = async (req, res) => {
     }
 }
 
+const getVendorNotification = async (req, res) => {
+    const { vendorId, page = 1, limit = 10 } = req.body;
+    const skip = (page - 1) * limit;
+
+    try {
+        const result = await notification.aggregate([
+            {
+                $match: {
+                    vendorRecipients:{
+                        $elemMatch:{
+                          "vendorId":vendorId
+                        }
+                      }
+                }
+            },
+            {
+                $facet: {
+                    notifications: [
+                        { $skip: skip },
+                        { $limit: limit }
+                    ],
+                    totalNotifications: [
+                        { $count: "count" }
+                    ]
+                }
+            }
+        ]);
+
+        const notifications = result[0].notifications || [];
+        const totalNotifications = result[0].totalNotifications[0]?.count || 0;
+        const totalPages = Math.ceil(totalNotifications / limit);
+
+        res.json({
+            notifications,
+            totalPages,
+            currentPage: page,
+            totalNotifications,
+        });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to fetch notifications" });
+    }
+}
+
+const notificationReadByVendor = async (req, res) => {
+    const { id } = req.params;
+    const { vendorId } = req.body;
+
+    try {
+        const updatedNotification = await notification.findOneAndUpdate(
+            {
+                _id: id,
+                "vendorRecipients.vendorId": vendorId
+            },
+            { $set: { "vendorRecipients.$.isRead": true } },
+            { new: true }
+        );
+
+        if (!updatedNotification) {
+            return res.status(404).json({ message: 'Notification or recipient not found.' });
+        }
+
+        res.status(200).json({ message: 'Notification marked as read.', notification: updatedNotification });
+    } catch (error) {
+        res.status(500).json({ message: 'An error occurred.', error });
+    }
+}
+
 module.exports =
 {
     sendNotification,
     getUserNotification,
-    notificationReadByUser
+    notificationReadByUser,
+    getVendorNotification,
+    notificationReadByVendor
 }
