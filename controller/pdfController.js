@@ -36,7 +36,7 @@ const getTaxFormByVendorId = async (req, res) => {
       return res.status(400).send('Vendor ID is required.');
     }
 
-    const taxDocument = await taxpayModel.findOne({ vendorId: vendorId });
+    const taxDocument = await taxpayModel.find({ vendorId: vendorId });
 
     if (!taxDocument) {
       return res.status(404).send('Tax document not found for this vendor.');
