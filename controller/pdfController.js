@@ -1,4 +1,5 @@
 const taxpayModel = require('../model/taxPeyerModel');
+const vendorModel = require('../model/vendorModel');
 
 const generateTaxFormPdf = async (req, res) => {
   try {
@@ -21,7 +22,7 @@ const generateTaxFormPdf = async (req, res) => {
 
     return res.status(200).send({
       message: 'PDF uploaded successfully',
-      status:200
+      status: 200
     });
   } catch (error) {
     return res.status(500).send('Failed to upload PDF');
@@ -52,4 +53,33 @@ const getTaxFormByVendorId = async (req, res) => {
   }
 };
 
-module.exports = { generateTaxFormPdf,getTaxFormByVendorId };
+const getTaxForm = async (req, res) => {
+  try {
+    const taxDocuments = await taxpayModel.find();
+
+    if (!taxDocuments || taxDocuments.length === 0) {
+      return res.status(404).send('No tax documents found.');
+    }
+
+    const result = [];
+    for (let doc of taxDocuments) {
+      const vendor = await vendorModel.findOne({ vendorId: doc.vendorId });
+      const vendorName = vendor ? vendor.name : 'Vendor not found';
+      result.push({
+        ...doc.toObject(),
+        vendorName,
+      });
+    }
+
+    return res.status(200).send({
+      message: 'Tax document retrieved successfully',
+      status: 200,
+      data: result
+    });
+
+  } catch (error) {
+    return res.status(500).send({ error: error.message });
+  }
+};
+
+module.exports = { generateTaxFormPdf, getTaxFormByVendorId, getTaxForm };
