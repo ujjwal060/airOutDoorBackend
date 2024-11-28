@@ -11,6 +11,8 @@ const contactus=require('./routes/contactRoute');
 const payouts=require('./routes/payoutRoute');
 const blogs=require('./routes/blogRoutes');
 const notification=require('./routes/notificationRoute');
+const pdf=require('./routes/pdfRoute');
+
 
 const router = express.Router();
 
@@ -27,6 +29,8 @@ router.use('/contact',contactus);
 router.use('/payouts',payouts);
 router.use('/blogs',blogs);
 router.use('/notification',notification);
+router.use('/pdf',pdf);
+
 
 
 module.exports = router;
