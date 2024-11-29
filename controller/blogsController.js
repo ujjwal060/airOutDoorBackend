@@ -1,7 +1,7 @@
 const Blogs = require("../model/blogsModel");
 
 const createBlog = async (req, res) => {
-  const { title, category, content,date, author, status } = req.body;
+  const { title,description, category, content,date, author, status } = req.body;
 
   let imageUrl = [];
     if (req.fileLocations) {
@@ -9,7 +9,7 @@ const createBlog = async (req, res) => {
     }
 
   const newBlog = new Blogs({
-    title,
+    title,description,
     images:imageUrl,
     category,
     content,
