@@ -210,38 +210,84 @@ const deleteProperty = async (req, res) => {
 
 const getfeaturedProperty = async (req, res) => {
   try {
-    const { categoryId } = req.body;
+    const { categoryId, lat, lng } = req.body.requestPayload;
 
-    let query = {};
+    let aggregation = [];
 
     if (categoryId) {
-      query = { category: categoryId };
+      aggregation.push({
+        $match: { category: categoryId }
+      });
     }
 
-    const featuredProperties = await Property.find(query).populate({
-      path: "category",
-      select: "name",
+    if (lat && lng) {
+      const RADIUS_OF_EARTH = 6371;
+      const MAX_DISTANCE = 5;
+
+      aggregation.push({
+        $addFields: {
+          distance: {
+            $multiply: [
+              RADIUS_OF_EARTH,
+              {
+                $acos: {
+                  $add: [
+                    {
+                      $multiply: [
+                        { $sin: { $divide: [{ $multiply: [lat, Math.PI] }, 180] } },
+                        { $sin: { $divide: [{ $multiply: ['$location.latitude', Math.PI] }, 180] } }
+                      ]
+                    },
+                    {
+                      $multiply: [
+                        { $cos: { $divide: [{ $multiply: [lat, Math.PI] }, 180] } },
+                        { $cos: { $divide: [{ $multiply: ['$location.latitude', Math.PI] }, 180] } },
+                        { $cos: { $divide: [{ $subtract: [lng, '$location.longitude'] }, 180] } }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      });
+
+      aggregation.push({
+        $match: {
+          distance: { $lte: MAX_DISTANCE }
+        }
+      });
+    }
+
+    aggregation.push({
+      $lookup: {
+        from: 'categories',
+        localField: 'category',
+        foreignField: '_id',
+        as: 'categoryDetails'
+      }
     });
-    // if (featuredProperties.length === 0) {
-    //   return res
-    //     .status(404)
-    //     .json({ status: 404, message: "No featured properties found for today." });
-    // }
 
-    const result = await Promise.all(
-      featuredProperties.map(async (property) => {
-        const category = await Category.findById(property.category);
+    aggregation.push({
+      $unwind: {
+        path: '$categoryDetails',
+        preserveNullAndEmptyArrays: true
+      }
+    });
 
-        return {
-          ...property.toObject(),
-          category: category ? category.name : null,
-        };
-      })
-    );
+    const featuredProperties = await Property.aggregate(aggregation);
+
+    const result = featuredProperties.map((property) => {
+      return {
+        ...property,
+        category: property.categoryDetails ? property.categoryDetails.name : null,
+      };
+    });
 
     return res.status(200).json({
       status: 200,
-      message: "get all",
+      message: "Successfully fetched featured properties",
       data: result,
     });
   } catch (error) {
