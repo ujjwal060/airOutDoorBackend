@@ -234,15 +234,15 @@ const getfeaturedProperty = async (req, res) => {
                   $add: [
                     {
                       $multiply: [
-                        { $sin: { $divide: [{ $multiply: [lat, Math.PI] }, 180] } },
-                        { $sin: { $divide: [{ $multiply: ['$location.latitude', Math.PI] }, 180] } }
+                        { $sin: { $radians: lat } },
+                        { $sin: { $radians: "$location.latitude" } }
                       ]
                     },
                     {
                       $multiply: [
-                        { $cos: { $divide: [{ $multiply: [lat, Math.PI] }, 180] } },
-                        { $cos: { $divide: [{ $multiply: ['$location.latitude', Math.PI] }, 180] } },
-                        { $cos: { $divide: [{ $subtract: [lng, '$location.longitude'] }, 180] } }
+                        { $cos: { $radians: lat } },
+                        { $cos: { $radians: "$location.latitude" } },
+                        { $cos: { $radians: { $subtract: [lng, "$location.longitude"] } } }
                       ]
                     }
                   ]
@@ -262,39 +262,37 @@ const getfeaturedProperty = async (req, res) => {
 
     aggregation.push({
       $lookup: {
-        from: 'categories',
-        localField: 'category',
-        foreignField: '_id',
-        as: 'categoryDetails'
+        from: "categories",
+        localField: "category",
+        foreignField: "_id",
+        as: "categoryDetails"
       }
     });
 
     aggregation.push({
-      $unwind: {
-        path: '$categoryDetails',
-        preserveNullAndEmptyArrays: true
+      $addFields: {
+        category: { $arrayElemAt: ["$categoryDetails.name", 0] }
+      }
+    });
+
+    aggregation.push({
+      $project:{
+        categoryDetails: 0
       }
     });
 
     const featuredProperties = await Property.aggregate(aggregation);
 
-    const result = featuredProperties.map((property) => {
-      return {
-        ...property,
-        category: property.categoryDetails ? property.categoryDetails.name : null,
-      };
-    });
-
     return res.status(200).json({
       status: 200,
       message: "Successfully fetched featured properties",
-      data: result,
+      data: featuredProperties,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
-// add to favourite controller
+
 const favouriteproperty = async (req, res) => {
 
   const { propertyId, isFavorite } = req.body;
@@ -313,6 +311,7 @@ const favouriteproperty = async (req, res) => {
     res.status(500).send("Error updating favorite status");
   }
 };
+
 const getFavoriteProperty = async (req, res) => {
   try {
     const favProperty = await Property.find({ isFavorite: true });
