@@ -70,9 +70,26 @@ const getAllPayout = async (req, res) => {
             }
         ]);
 
+        const totalExpenseResult = await bookingModel.aggregate([
+            {
+                $addFields: {
+                    totalAmountNumeric: { $toDouble: '$totalAmount' }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalExpense: {
+                        $sum: '$totalAmountNumeric'
+                    }
+                }
+            }
+        ]);
+
+        const totalExpense = totalExpenseResult[0]?.totalExpense || 0;
         res.status(200).json({
             status: 200,
-            data: allPay
+            data: { allPay, totalExpense }
         });
     } catch (error) {
         res.status(500).json({
