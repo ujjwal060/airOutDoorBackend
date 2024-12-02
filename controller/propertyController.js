@@ -209,6 +209,7 @@ const deleteProperty = async (req, res) => {
 };
 
 const getfeaturedProperty = async (req, res) => {
+  console.log("into featured property",req.body)
   try {
     const { categoryId, lat, lng } = req.body.requestPayload;
 
@@ -294,7 +295,6 @@ const getfeaturedProperty = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-// add to favourite controller
 const favouriteproperty = async (req, res) => {
 
   const { propertyId, isFavorite } = req.body;

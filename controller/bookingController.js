@@ -49,6 +49,30 @@ const getBooking = async (req, res) => {
         return res.status(500).json({ message: 'An error occurred while fetching bookings.' });
     }
 }
+const deleteBooking = async (req, res) => {
+    try {
+        const vendorId = req.params.vendorId;
+        const bookings = await booking.find({ vendorId: vendorId });
+
+        if (!bookings.length) {
+            return res.status(404).json({ message: 'No bookings found for this vendor.' });
+        }
+
+        const bookingsWithProperties = await Promise.all(
+            bookings.map(async (booking) => {
+                const propertyData = await property.findById(booking.propertyId);
+                return {
+                    ...booking._doc,
+                    propertyDetails: propertyData
+                };
+            })
+        );
+
+        return res.status(200).json(bookingsWithProperties);
+    } catch (error) {
+        return res.status(500).json({ message: 'An error occurred while fetching bookings.' });
+    }
+}
 
 const getBookingByUser = async (req, res) => {
     try {
