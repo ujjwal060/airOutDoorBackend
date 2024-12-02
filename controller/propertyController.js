@@ -209,6 +209,7 @@ const deleteProperty = async (req, res) => {
 };
 
 const getfeaturedProperty = async (req, res) => {
+  console.log("into featured property",req.body)
   try {
     const { categoryId, lat, lng } = req.body.requestPayload;
 
