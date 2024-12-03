@@ -217,22 +217,24 @@ const deleteProperty = async (req, res) => {
 };
 
 const getfeaturedProperty = async (req, res) => {
-  console.log("into featured property",req.body)
+  console.log("into featured property", req.body);
   try {
     const { categoryId, lat, lng } = req.body.requestPayload;
 
+    const RADIUS_OF_EARTH = 6371; // Radius of Earth in km
+    const MAX_DISTANCE = 5; // Maximum distance in km
+
     let aggregation = [];
 
+    // Filter by category ID
     if (categoryId) {
       aggregation.push({
-        $match: { category: categoryId }
+        $match: { category: categoryId },
       });
     }
 
+    // Filter by location (lat/lng)
     if (lat && lng) {
-      const RADIUS_OF_EARTH = 6371;
-      const MAX_DISTANCE = 5;
-
       aggregation.push({
         $addFields: {
           distance: {
@@ -244,50 +246,101 @@ const getfeaturedProperty = async (req, res) => {
                     {
                       $multiply: [
                         { $sin: { $radians: lat } },
-                        { $sin: { $radians: "$location.latitude" } }
-                      ]
+                        { $sin: { $radians: "$location.latitude" } },
+                      ],
                     },
                     {
                       $multiply: [
                         { $cos: { $radians: lat } },
                         { $cos: { $radians: "$location.latitude" } },
-                        { $cos: { $radians: { $subtract: [lng, "$location.longitude"] } } }
-                      ]
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        }
+                        { $cos: { $radians: { $subtract: [lng, "$location.longitude"] } } },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
       });
 
       aggregation.push({
         $match: {
-          distance: { $lte: MAX_DISTANCE }
-        }
+          distance: { $lte: MAX_DISTANCE },
+        },
       });
     }
 
+    // Populate category details
     aggregation.push({
       $lookup: {
         from: "categories",
         localField: "category",
         foreignField: "_id",
-        as: "categoryDetails"
-      }
+        as: "categoryDetails",
+      },
     });
 
     aggregation.push({
       $addFields: {
-        category: { $arrayElemAt: ["$categoryDetails.name", 0] }
-      }
+        category: { $arrayElemAt: ["$categoryDetails.name", 0] },
+      },
+    });
+
+    // Populate reviews and users in reviews
+    aggregation.push({
+      $lookup: {
+        from: "reviews",
+        localField: "reviews",
+        foreignField: "_id",
+        as: "reviewDetails",
+      },
     });
 
     aggregation.push({
-      $project:{
-        categoryDetails: 0
-      }
+      $lookup: {
+        from: "users",
+        localField: "reviewDetails.user",
+        foreignField: "_id",
+        as: "userDetails",
+      },
+    });
+
+    aggregation.push({
+      $addFields: {
+        reviews: {
+          $map: {
+            input: "$reviewDetails",
+            as: "review",
+            in: {
+              rating: "$$review.rating",
+              review: "$$review.review",
+              createdAt: "$$review.createdAt",
+              user: {
+                $arrayElemAt: [
+                  {
+                    $filter: {
+                      input: "$userDetails",
+                      as: "user",
+                      cond: { $eq: ["$$user._id", "$$review.user"] },
+                    },
+                  },
+                  0,
+                ],
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Cleanup unwanted fields
+    aggregation.push({
+      $project: {
+        categoryDetails: 0,
+        reviewDetails: 0,
+        userDetails: 0,
+      },
     });
 
     const featuredProperties = await Property.aggregate(aggregation);
@@ -298,9 +351,11 @@ const getfeaturedProperty = async (req, res) => {
       data: featuredProperties,
     });
   } catch (error) {
+    console.error("Error fetching featured properties:", error);
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 const favouriteproperty = async (req, res) => {
 
