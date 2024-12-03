@@ -4,12 +4,20 @@ const Category = require("../model/catogriesModel");
 const getProperties = async (req, res) => {
   try {
     const { vendorId } = req.params;
-    const properties = await Property.find({ vendorId: vendorId });
-    res.json(properties);
+
+    const properties = await Property.find({ vendorId })
+      .populate({
+        path: 'reviews', // Populate the reviews field
+        populate: { path: 'user', select: 'fullName imageUrl' }, // Populate user details in reviews
+      });
+
+    res.status(200).json(properties);
   } catch (err) {
+    console.error("Error fetching properties:", err);
     res.status(500).json({ message: "Error fetching properties" });
   }
 };
+
 
 const addProperty = async (req, res) => {
   try {
