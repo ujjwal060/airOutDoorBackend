@@ -4,8 +4,10 @@ const Category = require("../model/catogriesModel");
 const getProperties = async (req, res) => {
   try {
     const { vendorId } = req.params;
+    const currentDate = new Date();
 
-    const properties = await Property.find({ vendorId })
+
+    const properties = await Property.find({ vendorId ,endDate: { $gte: currentDate },})
       .populate({
         path: 'reviews', // Populate the reviews field
         populate: { path: 'user', select: 'fullName imageUrl' }, // Populate user details in reviews
@@ -217,14 +219,19 @@ const deleteProperty = async (req, res) => {
 };
 
 const getfeaturedProperty = async (req, res) => {
-  console.log("into featured property", req.body);
   try {
     const { categoryId, lat, lng } = req.body.requestPayload;
 
     const RADIUS_OF_EARTH = 6371; // Radius of Earth in km
     const MAX_DISTANCE = 5; // Maximum distance in km
+    const currentDate = new Date(); // Get the current date
 
     let aggregation = [];
+
+    // Filter out expired properties
+    aggregation.push({
+      $match: { endDate: { $gte: currentDate } }, // Only include properties with endDate >= current date
+    });
 
     // Filter by category ID
     if (categoryId) {
@@ -360,8 +367,9 @@ const getfeaturedProperty = async (req, res) => {
 const favouriteproperty = async (req, res) => {
 
   const { propertyId, isFavorite } = req.body;
+  const currentDate = new Date();
   try {
-    const property = await Property.findById(propertyId);
+    const property = await Property.findById({propertyId,endDate: { $gte: currentDate }});
     if (!property) {
       return res.status(404).send("Property not found");
     }
@@ -378,7 +386,8 @@ const favouriteproperty = async (req, res) => {
 
 const getFavoriteProperty = async (req, res) => {
   try {
-    const favProperty = await Property.find({ isFavorite: true });
+    const currentDate = new Date();
+    const favProperty = await Property.find({ isFavorite: true,endDate: { $gte: currentDate  }});
     //console("favorite properties", favProperty);
     res.status(200).json({
       success: true,
