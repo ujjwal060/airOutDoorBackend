@@ -145,7 +145,7 @@ const addReview = async (req, res) => {
 const getReviews = async (req, res) => {
   try {
     const { search, page, limit, propertyId, userId, vendorId } = req.query;
-    console.log(vendorId);
+    
 
     const pageNumber = parseInt(page) || 1;
     const pageSize = parseInt(limit) || 10;
@@ -179,12 +179,11 @@ const getReviews = async (req, res) => {
 
     // Fetch paginated reviews with sorting and population
     const reviews = await Review.find(query)
-      .populate("property", "propertyName location")
-      .populate("user", "fullName email")
+      .populate("property", "propertyName images")
+      .populate("user", "fullName imageUrl email")
       .skip((pageNumber - 1) * pageSize)
       .limit(pageSize)
       .sort({ createdAt: -1 });
-    console.log("reviews", reviews);
     res.status(200).json({
       total: totalReviews,
       data: reviews,
