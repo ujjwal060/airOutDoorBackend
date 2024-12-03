@@ -5,15 +5,15 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 const bookProperty = async (req, res) => {
     try {
-        const { propertyId, userId, vendorId, checkIn, checkOut, guests, totalAmount } = req.body;
+        const { propertyId, userId, vendorId, checkIn,guestDetails, checkOut, guests, totalAmount } = req.body;
 
         const newBooking = new booking({
             propertyId,
             vendorId,
             userId,
             checkInDate: checkIn,
-            checkOutDate: checkOut,
-            guests,
+            checkOutDate: checkOut, 
+            guests,guestDetails,
             totalAmount,
             bookingStatus: 'pending',
         });

@@ -103,6 +103,8 @@ const propertySchema = new mongoose.Schema({
       // required: true,
     },
   },
+  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
+  averageRating: { type: Number, default: 0 },
   startDate: { type: Date },
   endDate: { type: Date },
   isApproveByAdmin: {
