@@ -149,7 +149,7 @@ const allUser=async(req,res)=>{
   }
 }
 
-const allProoerty=async(req,res)=>{
+const allProoerty = async (req, res) => {
   try {
     const { search, page, limit } = req.body;
 
@@ -158,12 +158,19 @@ const allProoerty=async(req,res)=>{
 
     const aggregation = [];
 
+    // Filter by search keyword
     if (search) {
       aggregation.push({
-        $match: { propertyName: { $regex: search, $options: 'i' } }
+        $match: { propertyName: { $regex: search, $options: 'i' } },
       });
     }
 
+    // Sort by newest first
+    aggregation.push({
+      $sort: { createdAt: -1 }, // Sort properties by createdAt in descending order
+    });
+
+    // Pagination using $facet
     aggregation.push({
       $facet: {
         data: [
@@ -171,17 +178,20 @@ const allProoerty=async(req,res)=>{
           { $limit: pageSize },
         ],
         totalCount: [
-          { $count: 'count' }
-        ]
-      }
+          { $count: 'count' },
+        ],
+      },
     });
 
+    // Execute the aggregation pipeline
     const results = await property.aggregate(aggregation);
 
+    // Extract data and total count
     const data = results[0].data;
     const total = results[0].totalCount[0] ? results[0].totalCount[0].count : 0;
     const totalPages = Math.ceil(total / pageSize);
 
+    // Send response
     res.json({
       data,
       total,
@@ -189,8 +199,10 @@ const allProoerty=async(req,res)=>{
       currentPage: pageNumber,
     });
   } catch (error) {
-    res.status(500).json({ error:error.message});
+    console.error("Error fetching all properties:", error);
+    res.status(500).json({ error: error.message });
   }
-}
+};
+
 
 module.exports = { login,vendorApprove,allVendor,allProoerty,allUser }

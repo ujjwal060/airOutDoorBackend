@@ -7,7 +7,7 @@ const getProperties = async (req, res) => {
     const currentDate = new Date();
 
 
-    const properties = await Property.find({ vendorId ,endDate: { $gte: currentDate },})
+    const properties = await Property.find({ vendorId ,endDate: { $gte: currentDate },}).sort({ createdAt: -1 })
       .populate({
         path: 'reviews', // Populate the reviews field
         populate: { path: 'user', select: 'fullName imageUrl' }, // Populate user details in reviews
@@ -228,9 +228,8 @@ const getfeaturedProperty = async (req, res) => {
 
     let aggregation = [];
 
-    // Filter out expired properties
     aggregation.push({
-      $match: { endDate: { $gte: currentDate } }, // Only include properties with endDate >= current date
+      $match: { endDate: { $gte: currentDate } }, 
     });
 
     // Filter by category ID
@@ -240,7 +239,6 @@ const getfeaturedProperty = async (req, res) => {
       });
     }
 
-    // Filter by location (lat/lng)
     if (lat && lng) {
       aggregation.push({
         $addFields: {
@@ -341,6 +339,11 @@ const getfeaturedProperty = async (req, res) => {
       },
     });
 
+    // Sort by newest first
+    aggregation.push({
+      $sort: { createdAt: -1 }, // Sort by createdAt field in descending order
+    });
+
     // Cleanup unwanted fields
     aggregation.push({
       $project: {
@@ -364,12 +367,13 @@ const getfeaturedProperty = async (req, res) => {
 };
 
 
+
 const favouriteproperty = async (req, res) => {
 
   const { propertyId, isFavorite } = req.body;
   const currentDate = new Date();
   try {
-    const property = await Property.findById({propertyId,endDate: { $gte: currentDate }});
+    const property = await Property.findById({propertyId,endDate: { $gte: currentDate }}).sort({ createdAt: -1 });
     if (!property) {
       return res.status(404).send("Property not found");
     }
@@ -387,7 +391,7 @@ const favouriteproperty = async (req, res) => {
 const getFavoriteProperty = async (req, res) => {
   try {
     const currentDate = new Date();
-    const favProperty = await Property.find({ isFavorite: true,endDate: { $gte: currentDate  }});
+    const favProperty = await Property.find({ isFavorite: true,endDate: { $gte: currentDate  }}).sort({ createdAt: -1 });
     //console("favorite properties", favProperty);
     res.status(200).json({
       success: true,
