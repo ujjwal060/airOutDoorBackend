@@ -11,6 +11,7 @@ const contactus=require('./routes/contactRoute');
 const payouts=require('./routes/payoutRoute');
 const blogs=require('./routes/blogRoutes');
 const notification=require('./routes/notificationRoute');
+const reviews=require('./routes/reviewRoute');
 const pdf=require('./routes/pdfRoute');
 
 
@@ -30,6 +31,7 @@ router.use('/payouts',payouts);
 router.use('/blogs',blogs);
 router.use('/notification',notification);
 router.use('/pdf',pdf);
+router.use("/review", reviews);
 
 
 
