@@ -1,7 +1,7 @@
 const booking = require("../model/bookingModel");
 const property = require("../model/propertyModel");
 const userModel = require("../model/userModel");
-const Review=require("../model/reviewModel")
+const Review = require("../model/reviewModel");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const bookProperty = async (req, res) => {
@@ -114,13 +114,13 @@ const getBookingByUser = async (req, res) => {
           return {
             ...booking._doc,
             propertyDetails: null,
-            reviews: [], 
+            reviews: [],
           };
         }
 
         const userReviews = await Review.find({
-          propertyId: booking.propertyId,
-          userId: userId,
+          property: booking.propertyId,
+          user: userId,
         }).select("rating review createdAt");
 
         return {
@@ -143,7 +143,6 @@ const getBookingByUser = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
-
 
 // New function to get all bookings
 const getAllBookings = async (req, res) => {
