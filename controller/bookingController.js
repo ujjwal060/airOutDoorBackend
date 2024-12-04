@@ -1,6 +1,7 @@
 const booking = require("../model/bookingModel");
 const property = require("../model/propertyModel");
 const userModel = require("../model/userModel");
+const Review=require("../model/reviewModel")
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const bookProperty = async (req, res) => {
@@ -105,7 +106,7 @@ const getBookingByUser = async (req, res) => {
         .json({ message: "No bookings found for this user." });
     }
 
-    const bookingsWithProperties = await Promise.all(
+    const bookingsWithDetails = await Promise.all(
       bookings.map(async (booking) => {
         const propertyData = await property.findById(booking.propertyId);
 
@@ -113,8 +114,14 @@ const getBookingByUser = async (req, res) => {
           return {
             ...booking._doc,
             propertyDetails: null,
+            reviews: [], 
           };
         }
+
+        const userReviews = await Review.find({
+          propertyId: booking.propertyId,
+          userId: userId,
+        }).select("rating review createdAt");
 
         return {
           ...booking._doc,
@@ -122,6 +129,7 @@ const getBookingByUser = async (req, res) => {
             name: propertyData.propertyName,
             images: propertyData.images,
           },
+          reviews: userReviews, // User's reviews for this property
         };
       })
     );
@@ -129,12 +137,13 @@ const getBookingByUser = async (req, res) => {
     return res.status(200).json({
       status: 200,
       message: "Get bookings successfully.",
-      data: bookingsWithProperties,
+      data: bookingsWithDetails,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 // New function to get all bookings
 const getAllBookings = async (req, res) => {
