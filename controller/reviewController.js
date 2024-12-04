@@ -73,10 +73,10 @@ const deleteReview = async (req, res) => {
 const addReview = async (req, res) => {
   try {
     // Extract data from request body
-    const { propertyId, userId, rating, review } = req.body;
+    const { propertyId,bookingId, userId, rating, review } = req.body;
 
     // Validate required fields
-    if (!propertyId || !userId || !rating || !review) {
+    if (!propertyId|| !bookingId || !userId || !rating || !review) {
       return res.status(400).json({
         message:
           "All fields are required: propertyId, userId, rating, and review.",
@@ -104,6 +104,7 @@ const addReview = async (req, res) => {
     const newReview = new Review({
       property: propertyId,
       user: userId,
+      bookingId:bookingId,
       rating,
       review,
     });
@@ -144,7 +145,7 @@ const addReview = async (req, res) => {
 
 const getReviews = async (req, res) => {
   try {
-    const { search, page, limit, propertyId, userId, vendorId } = req.query;
+    const { search, page, limit,bookingId, propertyId, userId, vendorId } = req.query;
     
 
     const pageNumber = parseInt(page) || 1;
@@ -165,6 +166,9 @@ const getReviews = async (req, res) => {
     // Filter by userId
     if (userId) {
       query.user = userId;
+    }
+    if (bookingId) {
+      query.bookingId = bookingId;
     }
 
     // Filter by vendorId (filter properties by vendor)
