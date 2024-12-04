@@ -242,14 +242,16 @@ const getUsers = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
-const getHosts = async (req, res) => {
-  try {
-    const data = await Vendor.find().select("name profileImage ");
-    res.status(200).json({ message: "getting all hosts", data });
-  } catch (error) {
+
+const getHosts=async(req,res)=>{
+  try{
+    const data = await Vendor.find().select('name profileImage');
+    res.status(200).json({message:"get all users",data})
+  }catch(error){
     res.status(500).json({ message: error.message });
   }
 
+}
 
 module.exports = {
   getHosts,
@@ -262,4 +264,4 @@ module.exports = {
   changePassword,
   getAll,
   getUsers,
-};
+}
