@@ -229,5 +229,14 @@ const getUsers=async(req,res)=>{
     res.status(500).json({ message: error.message });
   }
 }
+const getHosts=async(req,res)=>{
+  try{
+    const {userIds}=req.body;
+    const data = await Vendor.find().select('name profileImage');
+    res.status(200).json({message:"get all users",data})
+  }catch(error){
+    res.status(500).json({ message: error.message });
+  }
+}
 
 module.exports = { createVendor, login, sendEmailOTP, resetPassword, editProfile,verifyOTP, changePassword,getAll,getUsers }
