@@ -59,7 +59,7 @@ const vendorApprove = async (req, res) => {
   }
 }
 
-const allVendor=async(req,res)=>{
+const allVendor = async (req, res) => {
   try {
     const { search, page, limit } = req.body;
 
@@ -68,11 +68,16 @@ const allVendor=async(req,res)=>{
 
     const aggregation = [];
 
+    // Search filter
     if (search) {
       aggregation.push({
         $match: { name: { $regex: search, $options: 'i' } }
       });
     }
+
+    aggregation.push({
+      $sort: { createdAt: -1 } 
+    });
 
     aggregation.push({
       $facet: {
@@ -102,7 +107,8 @@ const allVendor=async(req,res)=>{
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+};
+
 
 const allUser=async(req,res)=>{
   try {
@@ -118,6 +124,10 @@ const allUser=async(req,res)=>{
         $match: { name: { $regex: search, $options: 'i' } }
       });
     }
+
+    aggregation.push({
+      $sort: { createdAt: -1 } 
+    });
 
     aggregation.push({
       $facet: {
