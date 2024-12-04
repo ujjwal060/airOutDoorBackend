@@ -29,6 +29,8 @@ const bookProperty = async (req, res) => {
       bookingStatus: "pending",
     });
 
+    // updating review
+
     const savedBooking = await newBooking.save();
     res.status(200).json({ message: "Booking Successful!", savedBooking });
   } catch (error) {
@@ -41,7 +43,9 @@ const getBooking = async (req, res) => {
     const vendorId = req.params.vendorId;
     const bookings = await booking
       .find({ vendorId: vendorId })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 }).populate("userId")
+
+     
 
     if (!bookings.length) {
       return res
