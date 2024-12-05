@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 const propertySchema = new mongoose.Schema({
-  vendorId: { type: String, required: true },
+  vendorId: { type: String,},
   propertyNickname: {
     type: String,
     required: true,
@@ -57,7 +57,7 @@ const propertySchema = new mongoose.Schema({
     },
     guestPricePerDay: {
       type: Number,
-      required: true,
+      // required: true,
     },
     lodging: {
       type: String,
