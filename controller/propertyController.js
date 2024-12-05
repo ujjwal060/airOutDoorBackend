@@ -4,12 +4,22 @@ const Category = require("../model/catogriesModel");
 const getProperties = async (req, res) => {
   try {
     const { vendorId } = req.params;
-    const properties = await Property.find({ vendorId: vendorId });
-    res.json(properties);
+    const currentDate = new Date();
+
+
+    const properties = await Property.find({ vendorId ,endDate: { $gte: currentDate },}).sort({ createdAt: -1 })
+      .populate({
+        path: 'reviews', // Populate the reviews field
+        populate: { path: 'user', select: 'fullName imageUrl' }, // Populate user details in reviews
+      });
+
+    res.status(200).json(properties);
   } catch (err) {
+    console.error("Error fetching properties:", err);
     res.status(500).json({ message: "Error fetching properties" });
   }
 };
+
 
 const addProperty = async (req, res) => {
   try {
@@ -209,22 +219,27 @@ const deleteProperty = async (req, res) => {
 };
 
 const getfeaturedProperty = async (req, res) => {
-  console.log("into featured property",req.body)
   try {
     const { categoryId, lat, lng } = req.body.requestPayload;
 
+    const RADIUS_OF_EARTH = 6371; // Radius of Earth in km
+    const MAX_DISTANCE = 5; // Maximum distance in km
+    const currentDate = new Date(); // Get the current date
+
     let aggregation = [];
 
+    aggregation.push({
+      $match: { endDate: { $gte: currentDate } }, 
+    });
+
+    // Filter by category ID
     if (categoryId) {
       aggregation.push({
-        $match: { category: categoryId }
+        $match: { category: categoryId },
       });
     }
 
     if (lat && lng) {
-      const RADIUS_OF_EARTH = 6371;
-      const MAX_DISTANCE = 5;
-
       aggregation.push({
         $addFields: {
           distance: {
@@ -236,50 +251,106 @@ const getfeaturedProperty = async (req, res) => {
                     {
                       $multiply: [
                         { $sin: { $radians: lat } },
-                        { $sin: { $radians: "$location.latitude" } }
-                      ]
+                        { $sin: { $radians: "$location.latitude" } },
+                      ],
                     },
                     {
                       $multiply: [
                         { $cos: { $radians: lat } },
                         { $cos: { $radians: "$location.latitude" } },
-                        { $cos: { $radians: { $subtract: [lng, "$location.longitude"] } } }
-                      ]
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        }
+                        { $cos: { $radians: { $subtract: [lng, "$location.longitude"] } } },
+                      ],
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
       });
 
       aggregation.push({
         $match: {
-          distance: { $lte: MAX_DISTANCE }
-        }
+          distance: { $lte: MAX_DISTANCE },
+        },
       });
     }
 
+    // Populate category details
     aggregation.push({
       $lookup: {
         from: "categories",
         localField: "category",
         foreignField: "_id",
-        as: "categoryDetails"
-      }
+        as: "categoryDetails",
+      },
     });
 
     aggregation.push({
       $addFields: {
-        category: { $arrayElemAt: ["$categoryDetails.name", 0] }
-      }
+        category: { $arrayElemAt: ["$categoryDetails.name", 0] },
+      },
+    });
+
+    // Populate reviews and users in reviews
+    aggregation.push({
+      $lookup: {
+        from: "reviews",
+        localField: "reviews",
+        foreignField: "_id",
+        as: "reviewDetails",
+      },
     });
 
     aggregation.push({
-      $project:{
-        categoryDetails: 0
-      }
+      $lookup: {
+        from: "users",
+        localField: "reviewDetails.user",
+        foreignField: "_id",
+        as: "userDetails",
+      },
+    });
+
+    aggregation.push({
+      $addFields: {
+        reviews: {
+          $map: {
+            input: "$reviewDetails",
+            as: "review",
+            in: {
+              rating: "$$review.rating",
+              review: "$$review.review",
+              createdAt: "$$review.createdAt",
+              user: {
+                $arrayElemAt: [
+                  {
+                    $filter: {
+                      input: "$userDetails",
+                      as: "user",
+                      cond: { $eq: ["$$user._id", "$$review.user"] },
+                    },
+                  },
+                  0,
+                ],
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Sort by newest first
+    aggregation.push({
+      $sort: { createdAt: -1 }, // Sort by createdAt field in descending order
+    });
+
+    // Cleanup unwanted fields
+    aggregation.push({
+      $project: {
+        categoryDetails: 0,
+        reviewDetails: 0,
+        userDetails: 0,
+      },
     });
 
     const featuredProperties = await Property.aggregate(aggregation);
@@ -290,15 +361,19 @@ const getfeaturedProperty = async (req, res) => {
       data: featuredProperties,
     });
   } catch (error) {
+    console.error("Error fetching featured properties:", error);
     return res.status(500).json({ message: error.message });
   }
 };
 
+
+
 const favouriteproperty = async (req, res) => {
 
   const { propertyId, isFavorite } = req.body;
+  const currentDate = new Date();
   try {
-    const property = await Property.findById(propertyId);
+    const property = await Property.findById({propertyId,endDate: { $gte: currentDate }}).sort({ createdAt: -1 });
     if (!property) {
       return res.status(404).send("Property not found");
     }
@@ -315,7 +390,8 @@ const favouriteproperty = async (req, res) => {
 
 const getFavoriteProperty = async (req, res) => {
   try {
-    const favProperty = await Property.find({ isFavorite: true });
+    const currentDate = new Date();
+    const favProperty = await Property.find({ isFavorite: true,endDate: { $gte: currentDate  }}).sort({ createdAt: -1 });
     //console("favorite properties", favProperty);
     res.status(200).json({
       success: true,
