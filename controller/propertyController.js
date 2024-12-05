@@ -6,11 +6,14 @@ const getProperties = async (req, res) => {
     const { vendorId } = req.params;
     const currentDate = new Date();
 
-
-    const properties = await Property.find({ vendorId ,endDate: { $gte: currentDate },}).sort({ createdAt: -1 })
+    const properties = await Property.find({
+      vendorId,
+      endDate: { $gte: currentDate },
+    })
+      .sort({ createdAt: -1 })
       .populate({
-        path: 'reviews', // Populate the reviews field
-        populate: { path: 'user', select: 'fullName imageUrl' }, // Populate user details in reviews
+        path: "reviews", // Populate the reviews field
+        populate: { path: "user", select: "fullName imageUrl" }, // Populate user details in reviews
       });
 
     res.status(200).json(properties);
@@ -19,7 +22,6 @@ const getProperties = async (req, res) => {
     res.status(500).json({ message: "Error fetching properties" });
   }
 };
-
 
 const addProperty = async (req, res) => {
   try {
@@ -48,10 +50,15 @@ const addProperty = async (req, res) => {
       checkOut,
       groupPrice,
       groupSize,
+      minPrice,
+      maxPrice,
       guest_perPrice,
     } = req.body;
 
-    const parsedPriceRange = JSON.parse(priceRange);
+    let parsedPriceRange;
+    if (priceRange) {
+      parsedPriceRange = JSON.parse(priceRange);
+    }
 
     let imageUrl = [];
     if (req.fileLocations) {
@@ -63,8 +70,8 @@ const addProperty = async (req, res) => {
       category,
       propertyDescription: property_description,
       priceRange: {
-        min: parseInt(parsedPriceRange.min),
-        max: parseInt(parsedPriceRange.max),
+        min: minPrice ? minPrice : parseInt(parsedPriceRange.min),
+        max: maxPrice ? maxPrice : parseInt(parsedPriceRange.max),
       },
       details: {
         instantBooking: instant_booking,
@@ -175,7 +182,8 @@ const updateProperty = async (req, res) => {
         ? new Date(req.body.checkOut)
         : property.endDate,
       pricePerGroupSize: {
-        groupPrice: req.body.groupPrice || property.pricePerGroupSize.groupPrice,
+        groupPrice:
+          req.body.groupPrice || property.pricePerGroupSize.groupPrice,
         groupSize: req.body.groupSize || property.pricePerGroupSize.groupSize,
       },
     };
@@ -190,10 +198,11 @@ const updateProperty = async (req, res) => {
     // Respond with the updated property
     res.status(200).json(updatedProperty);
   } catch (error) {
-    res.status(500).json({ message: "Error updating property", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error updating property", error: error.message });
   }
 };
-
 
 const deleteProperty = async (req, res) => {
   try {
@@ -229,7 +238,7 @@ const getfeaturedProperty = async (req, res) => {
     let aggregation = [];
 
     aggregation.push({
-      $match: { endDate: { $gte: currentDate } }, 
+      $match: { endDate: { $gte: currentDate } },
     });
 
     // Filter by category ID
@@ -258,7 +267,13 @@ const getfeaturedProperty = async (req, res) => {
                       $multiply: [
                         { $cos: { $radians: lat } },
                         { $cos: { $radians: "$location.latitude" } },
-                        { $cos: { $radians: { $subtract: [lng, "$location.longitude"] } } },
+                        {
+                          $cos: {
+                            $radians: {
+                              $subtract: [lng, "$location.longitude"],
+                            },
+                          },
+                        },
                       ],
                     },
                   ],
@@ -366,14 +381,12 @@ const getfeaturedProperty = async (req, res) => {
   }
 };
 
-
-
 const favouriteproperty = async (req, res) => {
-
   const { propertyId, isFavorite } = req.body;
-  const currentDate = new Date();
+  
+
   try {
-    const property = await Property.findById({propertyId,endDate: { $gte: currentDate }}).sort({ createdAt: -1 });
+    const property = await Property.findById(propertyId);
     if (!property) {
       return res.status(404).send("Property not found");
     }
@@ -391,7 +404,10 @@ const favouriteproperty = async (req, res) => {
 const getFavoriteProperty = async (req, res) => {
   try {
     const currentDate = new Date();
-    const favProperty = await Property.find({ isFavorite: true,endDate: { $gte: currentDate  }}).sort({ createdAt: -1 });
+    const favProperty = await Property.find({
+      isFavorite: true,
+      endDate: { $gte: currentDate },
+    }).sort({ createdAt: -1 });
     //console("favorite properties", favProperty);
     res.status(200).json({
       success: true,
