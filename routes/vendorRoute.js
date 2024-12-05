@@ -16,7 +16,7 @@ router.put('/changePassword/:id',changePassword);
 router.get('/getAll',getAll);
 
 router.post('/getUsers',getUsers);
-router.get('/hosts',getHosts);
+router.get('/getHosts',getHosts);
 
 
 
