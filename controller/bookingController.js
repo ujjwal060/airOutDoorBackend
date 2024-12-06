@@ -182,6 +182,7 @@ const cancelBooking = async (req, res) => {
       bookings.refund.refundDate = date;
       bookings.refund.refundAmount = refundAmount;
       bookings.refund.cancellationFee = cancellationFee;
+      await bookings.save();
       res.status(200).json({
         message: "Booking cancelled successfully.",
         cancellationFee: `${CANCELLATION_FEE_PERCENTAGE}%`,
