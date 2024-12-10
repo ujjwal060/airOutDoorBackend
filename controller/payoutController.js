@@ -6,43 +6,53 @@ const mongoose = require("mongoose");
 
 const calculateAndInitializePayouts = async () => {
   try {
-    const aggregation = [];
-    aggregation.push({
-      $match: {
-        vendorId: { $ne: null },
-        totalAmount: { $type: "string" },
+    const aggregation = [
+      {
+        $match: {
+          vendorId: { $ne: null },
+          totalAmount: { $type: "string" },
+        },
       },
-    });
-    aggregation.push({
-      $addFields: {
-        totalAmountNumeric: { $toDouble: "$totalAmount" },
+      {
+        $addFields: {
+          totalAmountNumeric: { $toDouble: "$totalAmount" },
+        },
       },
-    });
-    aggregation.push({
-      $group: {
-        _id: "$vendorId",
-        totalAmount: { $sum: "$totalAmountNumeric" },
+      {
+        $group: {
+          _id: "$vendorId",
+          totalAmount: { $sum: "$totalAmountNumeric" },
+        },
       },
-    });
+    ];
 
     const vendorBookings = await bookingModel.aggregate(aggregation);
 
     for (const vendor of vendorBookings) {
       const { _id: vendorId, totalAmount } = vendor;
 
-      let payout = await payoutModel.findOne({ vendorId });
+      const payout = await payoutModel.findOne({ vendorId });
+      let totalPaid = 0;
 
-      if (!payout) {
-        payout = new payoutModel({
-          vendorId,
-          remainingAmount: totalAmount,
-          payouts: [],
-        });
-      } else {
-        payout.remainingAmount = totalAmount;
+      if (payout) {
+        totalPaid = payout.cashoutRequests
+          .filter((request) => request.status === "paid")
+          .reduce((sum, request) => sum + request.amountRequested, 0);
       }
 
-      await payout.save();
+      const remainingAmount = totalAmount - totalPaid;
+
+      if (!payout) {
+        const newPayout = new payoutModel({
+          vendorId,
+          remainingAmount,
+          payouts: [],
+        });
+        await newPayout.save();
+      } else {
+        payout.remainingAmount = remainingAmount;
+        await payout.save();
+      }
     }
   } catch (error) {
     console.error("Error calculating and initializing payouts:", error);
@@ -168,63 +178,40 @@ const cashoutRequest = async (req, res) => {
 };
 
 const approvePayout = async (req, res) => {
-  const { payoutRequestId, vendorId, amountRequested } = req.body;
+  const { payoutRequestId } = req.body;
 
   try {
-    // Fetch the specific cashout request and remainingAmount
-    const payout = await payoutModel.findOne(
-      { "cashoutRequests._id": new mongoose.Types.ObjectId(payoutRequestId) },
-      { "cashoutRequests.$": 1, vendorId: 1, remainingAmount: 1 }
-    );
-
-    if (!payout) {
-      return res.status(404).json({ message: "Payout request not found" });
-    }
-
-    const payoutRequest = payout.cashoutRequests[0];
-
-    if (payoutRequest.status !== "pending") {
-      return res
-        .status(400)
-        .json({ message: "Payout request has already been processed" });
-    }
-
-    if (payout.remainingAmount < amountRequested) {
-      return res
-        .status(400)
-        .json({ message: "Insufficient funds to process the payout" });
-    }
-
-    // Perform atomic update for both the cashout request and remainingAmount
-    const updateResult = await payoutModel.updateOne(
-      { "cashoutRequests._id": new mongoose.Types.ObjectId(payoutRequestId) },
+    const payout = await payoutModel.findOneAndUpdate(
+      {
+        "cashoutRequests._id": new mongoose.Types.ObjectId(payoutRequestId),
+        "cashoutRequests.status": "pending",
+      },
       {
         $set: {
           "cashoutRequests.$.status": "paid",
           "cashoutRequests.$.paymentDate": new Date(),
         },
-      }
+        $inc: {
+          remainingAmount: -1 * payoutRequest.amountRequested,
+        },
+      },
+      { new: true, projection: { "cashoutRequests.$": 1, remainingAmount: 1 } }
     );
 
-    if (updateResult.modifiedCount === 0) {
-      return res.status(500).json({ message: "Failed to update payout" });
+    if (!payout) {
+      return res.status(404).json({ message: "Payout request not found or already processed" });
     }
 
-    // Verify update
+    const payoutRequest = payout.cashoutRequests[0];
 
-    const updateAmount = await payoutModel.findOne({ vendorId });
-    console.log(
-      "Request data:",updateAmount.remainingAmount -= amountRequested
-    );
-    updateAmount.remainingAmount -= amountRequested;
-
-    await updateAmount.save();
-    console.log(
-        "After",updateAmount.remainingAmount
-      );
+    await calculateAndInitializePayouts();
+    
     res.status(200).json({
       message: "Payout approved and payment sent successfully",
+      remainingAmount: payout.remainingAmount,
+      payoutRequest,
     });
+
   } catch (error) {
     console.error("Error processing payout:", error);
     res.status(500).json({
