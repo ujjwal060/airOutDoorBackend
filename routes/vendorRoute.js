@@ -14,6 +14,7 @@ router.post('/forgate', resetPassword);
 router.put('/profile/:id',verifyToken, uploadToS3, editProfile);
 router.put('/changePassword/:id',changePassword);
 router.get('/getAll',getAll);
+
 router.post('/getUsers',getUsers);
 router.get('/getHosts',getHosts);
 
