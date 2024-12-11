@@ -190,12 +190,8 @@ const approvePayout = async (req, res) => {
         $set: {
           "cashoutRequests.$.status": "paid",
           "cashoutRequests.$.paymentDate": new Date(),
-        },
-        $inc: {
-          remainingAmount: -1 * payoutRequest.amountRequested,
-        },
-      },
-      { new: true, projection: { "cashoutRequests.$": 1, remainingAmount: 1 } }
+        }
+      }
     );
 
     if (!payout) {
