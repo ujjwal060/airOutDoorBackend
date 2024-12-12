@@ -8,7 +8,7 @@ const payoutSchema = new mongoose.Schema(
             {
                 amountRequested: { type: Number, required: true },
                 requestDate: { type: Date, default: Date.now },
-                stripeAccountId: { type: String, required: true },
+                stripeAccountId: { type: String, },
                 status: {
                     type: String,
                     enum: ['pending', 'paid', 'rejected'],

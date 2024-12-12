@@ -120,7 +120,7 @@ const getPayouthistoryByVendor = async (req, res) => {
 }
 
 const cashoutRequest = async (req, res) => {
-    const { vendorId, amountRequested, stripeAccountId } = req.body;
+    const { vendorId, amountRequested } = req.body;
 
     try {
         const payout = await payoutModel.findOne({ vendorId });
@@ -135,7 +135,6 @@ const cashoutRequest = async (req, res) => {
 
         const newCashoutRequest = {
             amountRequested,
-            stripeAccountId,
             requestDate: new Date(),
             status: 'pending',
         };
