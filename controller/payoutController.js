@@ -126,6 +126,29 @@ const getPayouthistoryByVendor = async (req, res) => {
         .json({ message: "Payout record not found for this vendor" });
     }
 
+}
+
+const cashoutRequest = async (req, res) => {
+    const { vendorId, amountRequested } = req.body;
+
+    try {
+        const payout = await payoutModel.findOne({ vendorId });
+
+        if (!payout) {
+            return res.status(404).json({ success: false, message: 'Payout record not found' });
+        }
+
+        if (amountRequested <= 0 || amountRequested > payout.remainingAmount) {
+            return res.status(400).json({ success: false, message: 'Invalid cashout amount' });
+        }
+
+        const newCashoutRequest = {
+            amountRequested,
+            requestDate: new Date(),
+            status: 'pending',
+        };
+
+
     res.status(200).json({
       cashoutRequests: payoutRecord.cashoutRequests,
       remainingAmount: payoutRecord.remainingAmount,
@@ -135,6 +158,7 @@ const getPayouthistoryByVendor = async (req, res) => {
     res.status(500).json({ message: "Error fetching payouts" });
   }
 };
+
 
 const cashoutRequest = async (req, res) => {
   const { vendorId, swiftCode, bankName, amountRequested, stripeAccountNo } =

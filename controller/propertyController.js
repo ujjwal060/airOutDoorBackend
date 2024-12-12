@@ -40,6 +40,7 @@ const addProperty = async (req, res) => {
       shooting_range,
       extended_details,
       address,
+      disabledDates,
       city,
       zip_code,
       state,
@@ -54,11 +55,8 @@ const addProperty = async (req, res) => {
       maxPrice,
       guest_perPrice,
     } = req.body;
-
-    let parsedPriceRange;
-    if (priceRange) {
-      parsedPriceRange = JSON.parse(priceRange);
-    }
+    console.log(req.body);
+   
 
     let imageUrl = [];
     if (req.fileLocations) {
@@ -70,8 +68,8 @@ const addProperty = async (req, res) => {
       category,
       propertyDescription: property_description,
       priceRange: {
-        min: minPrice ? minPrice : parseInt(parsedPriceRange.min),
-        max: maxPrice ? maxPrice : parseInt(parsedPriceRange.max),
+        min: priceRange.min ? priceRange?.min : minPrice,
+        max: priceRange.max ? priceRange?.max : maxPrice,
       },
       details: {
         instantBooking: instant_booking,
@@ -89,6 +87,7 @@ const addProperty = async (req, res) => {
       guidedHunt: guided_hunt,
       guestLimit: guest_limit,
       lodging,
+      disabledDates,
       shootingRange: shooting_range,
       extendedDetails: extended_details,
       location: {
@@ -383,7 +382,6 @@ const getfeaturedProperty = async (req, res) => {
 
 const favouriteproperty = async (req, res) => {
   const { propertyId, isFavorite } = req.body;
-  
 
   try {
     const property = await Property.findById(propertyId);
