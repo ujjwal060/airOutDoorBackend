@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose')
 
 const propertySchema = new mongoose.Schema({
-  vendorId: { type: String },
+  vendorId: { type: String,},
   propertyNickname: {
     type: String,
     required: true,
@@ -25,17 +25,18 @@ const propertySchema = new mongoose.Schema({
   priceRange: {
     min: {
       type: Number,
-      // required: true,
+      required: true,
     },
     max: {
       type: Number,
-      // required: true,
+      required: true,
     },
   },
   cancellationPolicy: {
     type: String,
   },
-  pricePerGroupSize: {
+  pricePerGroupSize:
+  {
     groupSize: { type: Number },
     groupPrice: { type: Number },
   },
@@ -102,19 +103,18 @@ const propertySchema = new mongoose.Schema({
       // required: true,
     },
   },
-  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
-  disabledDates: [{ type: Date }],
+  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
   averageRating: { type: Number, default: 0 },
   startDate: { type: Date },
   endDate: { type: Date },
   isApproveByAdmin: {
     type: Boolean,
-    default: false,
+    default: false
   },
   isFavorite: {
     type: Boolean,
     require: false,
-    default: false,
+    default: false
   },
   createdAt: {
     type: Date,
@@ -122,5 +122,6 @@ const propertySchema = new mongoose.Schema({
   },
 });
 
-const Property = mongoose.model("Property", propertySchema);
+
+const Property = mongoose.model('Property', propertySchema);
 module.exports = Property;
