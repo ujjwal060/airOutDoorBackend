@@ -43,8 +43,9 @@ const getBooking = async (req, res) => {
     const vendorId = req.params.vendorId;
     const bookings = await booking
       .find({ vendorId: vendorId })
-      .sort({ createdAt: -1 })
-      .populate("userId");
+      .sort({ createdAt: -1 }).populate("userId")
+
+     
 
     if (!bookings.length) {
       return res
@@ -146,24 +147,25 @@ const getAllBookings = async (req, res) => {
   }
 };
 
-const cancelBooking = async (req, res) => {
+const cancelBooking=async(req,res)=>{
   const { id } = req.params;
   const CANCELLATION_FEE_PERCENTAGE = 10;
-
   try {
     const bookings = await booking.findById(id);
 
     if (!bookings) {
-      return res.status(404).json({ message: "Booking not found." });
+      return res.status(404).json({ error: 'Booking not found.' });
+    }
+
+    if (bookings.bookingStatus === 'cancelled') {
+      return res.status(400).json({ error: 'Booking is already cancelled.' });
     }
 
     let refundAmount = 0;
-    console.log(id);
-    if (bookings.paymentStatus === "paid") {
+
+    if (bookings.paymentStatus === 'paid') {
       if (!bookings.paymentIntentId) {
-        return res
-          .status(400)
-          .json({ message: "Payment Intent ID is missing for refund." });
+        return res.status(400).json({ error: 'Payment Intent ID is missing for refund.' });
       }
 
       const totalAmount = parseFloat(bookings.totalAmount);
@@ -175,34 +177,22 @@ const cancelBooking = async (req, res) => {
         amount: Math.round(refundAmount * 100),
       });
 
-
-      bookings.bookingStatus = "cancelled";
-      bookings.paymentStatus = "refunded";
-      bookings.refund.refundId = refund.id;
-      bookings.refund.refundDate = date;
-      bookings.refund.refundAmount = refundAmount;
-      bookings.refund.cancellationFee = cancellationFee;
-      await bookings.save();
-      res.status(200).json({
-        message: "Booking cancelled successfully.",
-        cancellationFee: `${CANCELLATION_FEE_PERCENTAGE}%`,
-        refundableAmount: refundAmount,
-        bookings,
-      });
+      bookings.paymentStatus = 'refunded';
     }
-    let date = Date.now();
 
-    bookings.bookingStatus = "cancelled";
+    bookings.bookingStatus = 'cancelled';
     await bookings.save();
-    return res.status(201).json({
-      success: true,
-      message:
-        "You dont have any amount to refund, Your booking has been cancelled",
+
+    res.status(200).json({
+      message: 'Booking cancelled successfully.',
+      cancellationFee: `${CANCELLATION_FEE_PERCENTAGE}%`,
+      refundableAmount: refundAmount,
+      bookings,
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error:error.message });
   }
-};
+}
 
 const payment = async (req, res) => {
   const { amount, token, userId, bookingId, vendorId } = req.body;
@@ -285,5 +275,5 @@ module.exports = {
   getBookingByUser,
   getAllBookings,
   payment,
-  cancelBooking,
+  cancelBooking
 };
