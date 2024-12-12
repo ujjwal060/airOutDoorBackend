@@ -1,7 +1,11 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
-const payoutSchema = new mongoose.Schema(
+const payoutSchema = new mongoose.Schema({
+  vendorId: { type: String, ref: "Vendor" },
+  remainingAmount: { type: Number, required: true },
+  cashoutRequests: [
     {
+
         vendorId: { type: String, ref: 'Vendor' },
         remainingAmount: { type: Number, required: true },
         cashoutRequests: [
@@ -20,4 +24,5 @@ const payoutSchema = new mongoose.Schema(
     }
 );
 
-module.exports = mongoose.model('Payouts', payoutSchema);
+
+module.exports = mongoose.model("Payouts", payoutSchema);

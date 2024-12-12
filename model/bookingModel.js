@@ -1,18 +1,18 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema({
   propertyId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Property',
+    ref: "Property",
     required: true,
   },
   vendorId: {
-    type:String,
+    type: String,
     required: true,
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    ref: "User",
     required: true,
   },
   checkInDate: {
@@ -27,23 +27,25 @@ const bookingSchema = new mongoose.Schema({
     type: Number,
     required: true,
   },
-  guestDetails: [{
-    name: {
-      type: String,
-      required: true,
+  guestDetails: [
+    {
+      name: {
+        type: String,
+        required: true,
+      },
+      age: {
+        type: Number,
+        required: true,
+      },
+      phoneNo: {
+        type: String,
+      },
     },
-    age: {
-      type: Number,
-      required: true,
-    },
-    phoneNo: {
-      type: String,
-    },
-  }],
+  ],
   bookingStatus: {
     type: String,
-    enum: ['pending', 'confirmed', 'cancelled'],
-    default: 'pending',
+    enum: ["pending", "confirmed", "cancelled"],
+    default: "pending",
   },
   totalAmount: {
     type: String,
@@ -53,10 +55,22 @@ const bookingSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  refund: {
+    refundId: { type: String },
+    refundDate: {
+      type: Date,
+    },
+    refundAmount: {
+      type: String,
+    },
+    cancellationFee: {
+      type: String,
+    },
+  },
   paymentStatus: {
     type: String,
-    enum: ['paid', 'pending', 'failed','refunded'],
-    default: 'pending',
+    enum: ["paid", "pending", "failed", "refunded"],
+    default: "pending",
   },
   paymentIntentId: {
     type: String,
@@ -64,4 +78,4 @@ const bookingSchema = new mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model('Booking', bookingSchema);
+module.exports = mongoose.model("Booking", bookingSchema);
