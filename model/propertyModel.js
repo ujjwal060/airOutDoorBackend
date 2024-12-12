@@ -25,11 +25,11 @@ const propertySchema = new mongoose.Schema({
   priceRange: {
     min: {
       type: Number,
-      required: true,
+      // required: true,
     },
     max: {
       type: Number,
-      required: true,
+      // required: true,
     },
   },
   cancellationPolicy: {
@@ -105,6 +105,7 @@ const propertySchema = new mongoose.Schema({
   },
   reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
   averageRating: { type: Number, default: 0 },
+  disabledDates: [{ type: Date }],
   startDate: { type: Date },
   endDate: { type: Date },
   isApproveByAdmin: {

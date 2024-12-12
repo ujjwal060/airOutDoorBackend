@@ -53,6 +53,7 @@ const addProperty = async (req, res) => {
       minPrice,
       maxPrice,
       guest_perPrice,
+      disabledDates,
     } = req.body;
 
     let parsedPriceRange;
@@ -70,8 +71,8 @@ const addProperty = async (req, res) => {
       category,
       propertyDescription: property_description,
       priceRange: {
-        min: minPrice ? minPrice : parseInt(parsedPriceRange.min),
-        max: maxPrice ? maxPrice : parseInt(parsedPriceRange.max),
+        min: priceRange.min ? priceRange?.min : minPrice,
+        max: priceRange.max ? priceRange?.max : maxPrice,
       },
       details: {
         instantBooking: instant_booking,
@@ -102,6 +103,7 @@ const addProperty = async (req, res) => {
       },
       startDate: checkIn,
       endDate: checkOut,
+      disabledDates,
       pricePerGroupSize: {
         groupPrice: groupPrice,
         groupSize: groupSize,
