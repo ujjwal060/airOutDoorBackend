@@ -56,11 +56,12 @@ const addProperty = async (req, res) => {
       disabledDates,
     } = req.body;
 
+    const parsedDates = JSON.parse(disabledDates);
     let parsedPriceRange;
     if (priceRange) {
       parsedPriceRange = JSON.parse(priceRange);
     }
-
+    
     let imageUrl = [];
     if (req.fileLocations) {
       imageUrl = req.fileLocations;
@@ -103,7 +104,7 @@ const addProperty = async (req, res) => {
       },
       startDate: checkIn,
       endDate: checkOut,
-      disabledDates,
+      disabledDates:parsedDates,
       pricePerGroupSize: {
         groupPrice: groupPrice,
         groupSize: groupSize,
