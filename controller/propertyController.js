@@ -71,8 +71,8 @@ const addProperty = async (req, res) => {
       category,
       propertyDescription: property_description,
       priceRange: {
-        min: priceRange.min ? priceRange?.min : minPrice,
-        max: priceRange.max ? priceRange?.max : maxPrice,
+        min: Number(parsedPriceRange.min || minPrice),
+        max: Number(parsedPriceRange.max || maxPrice),
       },
       details: {
         instantBooking: instant_booking,
@@ -385,7 +385,6 @@ const getfeaturedProperty = async (req, res) => {
 
 const favouriteproperty = async (req, res) => {
   const { propertyId, isFavorite } = req.body;
-  
 
   try {
     const property = await Property.findById(propertyId);
