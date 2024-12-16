@@ -35,47 +35,8 @@ const propertySchema = new mongoose.Schema({
   cancellationPolicy: {
     type: String,
   },
-  pricePerGroupSize:
-  {
-    groupSize: { type: Number },
-    groupPrice: { type: Number },
-  },
   images: { type: [String] },
-  details: {
-    acreage: {
-      type: Number,
-      required: true,
-    },
-    guidedHunt: {
-      type: String,
-      // enum:["Yes","No","Optional"],
-      required: true,
-    },
-    guestLimitPerDay: {
-      type: Number,
-      required: true,
-    },
-    guestPricePerDay: {
-      type: Number,
-      // required: true,
-    },
-    lodging: {
-      type: String,
-      enum: [],
-      required: true,
-    },
-    shootingRange: {
-      type: String,
-      required: true,
-    },
-    optionalExtendedDetails: {
-      type: String,
-    },
-    instantBooking: {
-      type: Boolean,
-      default: false,
-    },
-  },
+
 
   location: {
     address: {
@@ -103,6 +64,7 @@ const propertySchema = new mongoose.Schema({
       // required: true,
     },
   },
+  CustomFields:[],
   reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
   averageRating: { type: Number, default: 0 },
   disabledDates: [{ type: Date }],
