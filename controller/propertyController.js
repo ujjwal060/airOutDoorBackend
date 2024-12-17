@@ -47,6 +47,8 @@ const addProperty = async (req, res) => {
       customFields,
     } = req.body;
     const parsedCustomFields = JSON.parse(customFields);
+
+    console.log(parsedCustomFields)
     const parsedDates = JSON.parse(disabledDates);
     let parsedPriceRange;
     if (priceRange) {
@@ -80,7 +82,7 @@ const addProperty = async (req, res) => {
       startDate: checkIn,
       endDate: checkOut,
       disabledDates: parsedDates,
-      CustomFields: parsedCustomFields,
+      customFields: parsedCustomFields,
     });
 
     const savedListing = await newListing.save();

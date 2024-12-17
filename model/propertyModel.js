@@ -64,7 +64,7 @@ const propertySchema = new mongoose.Schema({
       // required: true,
     },
   },
-  CustomFields:[],
+  customFields:[],
   reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
   averageRating: { type: Number, default: 0 },
   disabledDates: [{ type: Date }],
