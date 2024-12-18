@@ -61,7 +61,7 @@ const addProperty = async (req, res) => {
     if (priceRange) {
       parsedPriceRange = JSON.parse(priceRange);
     }
-    
+
     let imageUrl = [];
     if (req.fileLocations) {
       imageUrl = req.fileLocations;
@@ -104,7 +104,7 @@ const addProperty = async (req, res) => {
       },
       startDate: checkIn,
       endDate: checkOut,
-      disabledDates:parsedDates,
+      disabledDates: parsedDates,
       pricePerGroupSize: {
         groupPrice: groupPrice,
         groupSize: groupSize,
@@ -424,6 +424,43 @@ const getFavoriteProperty = async (req, res) => {
   }
 };
 
+const addCommisionAndApprove = async (req, res) => {
+  try {
+    const { approvalPropertyId, commisionPercent, dropdownValue } = req.body;
+
+    const property = await Property.findById(approvalPropertyId);
+
+    // Check if the property is already approved
+    if (property.isApproveByAdmin) {
+      return res.status(401).json({
+        success: false,
+        message: "Property is already Approved by the admin",
+      });
+    }
+
+    // Update the specific fields
+    await Property.findByIdAndUpdate(
+      approvalPropertyId,
+      {
+        isApproveByAdmin: dropdownValue,
+        adminCommission: commisionPercent,
+      },
+      { new: true } // Return the updated document if needed
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Property Approved and commission added successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Error while approving property",
+    });
+  }
+};
+
 module.exports = {
   getProperties,
   addProperty,
@@ -432,4 +469,5 @@ module.exports = {
   favouriteproperty,
   getfeaturedProperty,
   getFavoriteProperty,
+  addCommisionAndApprove,
 };
