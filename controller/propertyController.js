@@ -30,7 +30,6 @@ const addProperty = async (req, res) => {
       property_nickname,
       category,
       property_description,
-      priceRange,
       property_name,
       address,
       city,
@@ -41,19 +40,13 @@ const addProperty = async (req, res) => {
       longitude,
       checkIn,
       checkOut,
-      minPrice,
-      maxPrice,
+      pricePerPersonPerDay,
       disabledDates,
       customFields,
     } = req.body;
     const parsedCustomFields = JSON.parse(customFields);
 
-    console.log(parsedCustomFields)
     const parsedDates = JSON.parse(disabledDates);
-    let parsedPriceRange;
-    if (priceRange) {
-      parsedPriceRange = JSON.parse(priceRange);
-    }
 
     let imageUrl = [];
     if (req.fileLocations) {
@@ -64,10 +57,7 @@ const addProperty = async (req, res) => {
       propertyNickname: property_nickname,
       category,
       propertyDescription: property_description,
-      priceRange: {
-        min: Number(parsedPriceRange.min || minPrice),
-        max: Number(parsedPriceRange.max || maxPrice),
-      },
+      pricePerPersonPerDay:parseFloat(pricePerPersonPerDay),
       images: imageUrl,
       propertyName: property_name,
       location: {
@@ -82,11 +72,8 @@ const addProperty = async (req, res) => {
       startDate: checkIn,
       endDate: checkOut,
       disabledDates: parsedDates,
+      customFields:parsedCustomFields
 
-      pricePerGroupSize: {
-        groupPrice: groupPrice,
-        groupSize: groupSize,
-      },
 
     });
 
