@@ -374,6 +374,7 @@ const getFavoriteProperty = async (req, res) => {
 const addCommisionAndApprove = async (req, res) => {
   try {
     const { approvalPropertyId, adminCommission, dropdownValue } = req.body;
+    console.log(req.body)
 
     const property = await Property.findById(approvalPropertyId);
 
