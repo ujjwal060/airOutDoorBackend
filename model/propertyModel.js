@@ -22,16 +22,6 @@ const propertySchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  priceRange: {
-    min: {
-      type: Number,
-      // required: true,
-    },
-    max: {
-      type: Number,
-      // required: true,
-    },
-  },
   cancellationPolicy: {
     type: String,
   },
@@ -66,7 +56,7 @@ const propertySchema = new mongoose.Schema({
   },
 
   adminCommission:{type: Number,},
-
+  pricePerPersonPerDay:{type:Number},
   customFields:[],
 
   reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
