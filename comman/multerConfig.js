@@ -2,20 +2,24 @@ require('dotenv').config(); // Load environment variables from .env
 
 const multer = require('multer');
 const { S3 } = require('@aws-sdk/client-s3');
-const AWS = require('aws-sdk');
+const { SecretsManagerClient, GetSecretValueCommand } = require('@aws-sdk/client-secrets-manager');
 const path = require('path');
 
-// Initialize AWS Secrets Manager
-const secretsManager = new AWS.SecretsManager({ region: process.env.AWS_REGION });
+// Initialize AWS Secrets Manager client
+const secretsManagerClient = new SecretsManagerClient({ region: process.env.AWS_REGION });
 
-// Function to fetch AWS credentials from AWS Secrets Manager
+// Function to fetch AWS credentials from Secrets Manager
 const getAwsCredentials = async () => {
   try {
-    const data = await secretsManager
-      .getSecretValue({ SecretId: 'aws3' }) // Using the secret name `aws3`
-      .promise();
+    const command = new GetSecretValueCommand({ SecretId: 'atul-cred' }); // Replace with your Secret Name
+    const data = await secretsManagerClient.send(command);
+
     if (data.SecretString) {
-      return JSON.parse(data.SecretString);
+      const secret = JSON.parse(data.SecretString);
+      return {
+        accessKeyId: secret.AWS_ACCESS_KEY_ID,
+        secretAccessKey: secret.AWS_SECRET_ACCESS_KEY,
+      };
     }
   } catch (error) {
     console.error('Error fetching secrets:', error.message);
@@ -25,19 +29,20 @@ const getAwsCredentials = async () => {
 
 // Initialize S3 client with credentials from Secrets Manager
 let s3;
-getAwsCredentials()
-  .then((credentials) => {
+(async () => {
+  try {
+    const credentials = await getAwsCredentials();
     s3 = new S3({
       credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: credentials.accessKeyId,
+        secretAccessKey: credentials.secretAccessKey,
       },
       region: process.env.AWS_REGION,
     });
-  })
-  .catch((error) => {
+  } catch (error) {
     console.error('Error initializing S3:', error.message);
-  });
+  }
+})();
 
 // File filter for multer
 const fileFilter = (req, file, cb) => {
