@@ -64,7 +64,11 @@ const propertySchema = new mongoose.Schema({
       // required: true,
     },
   },
+
+  adminCommission:{type: Number,},
+
   customFields:[],
+
   reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
   averageRating: { type: Number, default: 0 },
   disabledDates: [{ type: Date }],

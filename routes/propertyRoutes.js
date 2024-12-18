@@ -1,5 +1,5 @@
 const express = require('express')
-const { getProperties, addProperty, updateProperty, deleteProperty,getfeaturedProperty, favouriteproperty, getFavoriteProperty } = require('../controller/propertyController')
+const { getProperties, addProperty, updateProperty, deleteProperty,getfeaturedProperty, favouriteproperty, getFavoriteProperty, addCommisionAndApprove } = require('../controller/propertyController')
 const {uploadToS3}=require('../comman/multerConfig');
 
 
@@ -12,5 +12,6 @@ router.delete('/delete/:id', deleteProperty);
 router.post('/favorite', favouriteproperty);
 router.get('/getfavorite', getFavoriteProperty);
 router.post('/featured',getfeaturedProperty);
+router.patch('/commission-approve',addCommisionAndApprove);
 
 module.exports = router
