@@ -373,7 +373,7 @@ const getFavoriteProperty = async (req, res) => {
 
 const addCommisionAndApprove = async (req, res) => {
   try {
-    const { approvalPropertyId, commisionPercent, dropdownValue } = req.body;
+    const { approvalPropertyId, adminCommission, dropdownValue } = req.body;
 
     const property = await Property.findById(approvalPropertyId);
 
@@ -390,7 +390,7 @@ const addCommisionAndApprove = async (req, res) => {
       approvalPropertyId,
       {
         isApproveByAdmin: dropdownValue,
-        adminCommission: commisionPercent,
+        adminCommission,
       },
       { new: true } // Return the updated document if needed
     );
