@@ -87,52 +87,36 @@ const addProperty = async (req, res) => {
 
 const updateProperty = async (req, res) => {
   try {
-    // Find the property by ID
     const property = await Property.findById(req.params.id);
     if (!property) {
       return res.status(404).json({ message: "Property not found" });
     }
 
-    // Parse priceRange if provided
-    let parsedPriceRange = property.priceRange;
-    if (req.body.priceRange) {
-      parsedPriceRange = JSON.parse(req.body.priceRange);
+    let parsedCustomFields = property?.customFields;
+    if (req?.body?.customFields) {
+      parsedCustomFields = JSON.parse(req?.body?.customFields);
     }
 
-    // Update image URLs if new ones are provided
+    let parsedDisabledDates = property?.disabledDates;
+    if (req?.body?.disabledDates) {
+      parsedDisabledDates = JSON.parse(req?.body?.disabledDates);
+    }
+
     let imageUrl = property.images;
     if (req.fileLocations) {
       imageUrl = req.fileLocations;
     }
 
-    // Prepare updated data
     const updatedData = {
       vendorId: req.body.vendorId || property.vendorId,
       propertyNickname: req.body.property_nickname || property.propertyNickname,
       category: req.body.category || property.category,
       propertyDescription:
         req.body.property_description || property.propertyDescription,
-      priceRange: {
-        min: parsedPriceRange.min || property.priceRange.min,
-        max: parsedPriceRange.max || property.priceRange.max,
-      },
-      details: {
-        instantBooking:
-          req.body.instant_booking !== undefined
-            ? req.body.instant_booking
-            : property.details.instantBooking,
-        acreage: req.body.acreage || property.details.acreage,
-        guidedHunt: req.body.guided_hunt || property.details.guidedHunt,
-        guestLimitPerDay:
-          req.body.guest_limit || property.details.guestLimitPerDay,
-        lodging: req.body.lodging || property.details.lodging,
-        shootingRange:
-          req.body.shooting_range || property.details.shootingRange,
-        optionalExtendedDetails:
-          req.body.extended_details || property.details.optionalExtendedDetails,
-        guestPricePerDay:
-          req.body.guest_perPrice || property.details.guestPricePerDay,
-      },
+      pricePerPersonPerDay:
+        req.body.pricePerPersonPerDay !== undefined
+          ? parseFloat(req.body.pricePerPersonPerDay)
+          : property.pricePerPersonPerDay,
       images: imageUrl,
       propertyName: req.body.property_name || property.propertyName,
       location: {
@@ -150,21 +134,17 @@ const updateProperty = async (req, res) => {
       endDate: req.body.checkOut
         ? new Date(req.body.checkOut)
         : property.endDate,
-      pricePerGroupSize: {
-        groupPrice:
-          req.body.groupPrice || property.pricePerGroupSize.groupPrice,
-        groupSize: req.body.groupSize || property.pricePerGroupSize.groupSize,
-      },
+      disabledDates: parsedDisabledDates,
+      customFields: parsedCustomFields,
     };
 
     // Update the property
     const updatedProperty = await Property.findByIdAndUpdate(
       req.params.id,
       updatedData,
-      { new: true } // Return the updated document
+      { new: true } 
     );
 
-    // Respond with the updated property
     res.status(200).json(updatedProperty);
   } catch (error) {
     res
@@ -172,6 +152,7 @@ const updateProperty = async (req, res) => {
       .json({ message: "Error updating property", error: error.message });
   }
 };
+
 
 const deleteProperty = async (req, res) => {
   try {
