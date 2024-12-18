@@ -30,15 +30,8 @@ const addProperty = async (req, res) => {
       property_nickname,
       category,
       property_description,
-      instant_booking,
       priceRange,
       property_name,
-      acreage,
-      guided_hunt,
-      guest_limit,
-      lodging,
-      shooting_range,
-      extended_details,
       address,
       city,
       zip_code,
@@ -48,20 +41,20 @@ const addProperty = async (req, res) => {
       longitude,
       checkIn,
       checkOut,
-      groupPrice,
-      groupSize,
       minPrice,
       maxPrice,
-      guest_perPrice,
       disabledDates,
+      customFields,
     } = req.body;
+    const parsedCustomFields = JSON.parse(customFields);
 
+    console.log(parsedCustomFields)
     const parsedDates = JSON.parse(disabledDates);
     let parsedPriceRange;
     if (priceRange) {
       parsedPriceRange = JSON.parse(priceRange);
     }
-    
+
     let imageUrl = [];
     if (req.fileLocations) {
       imageUrl = req.fileLocations;
@@ -75,24 +68,8 @@ const addProperty = async (req, res) => {
         min: Number(parsedPriceRange.min || minPrice),
         max: Number(parsedPriceRange.max || maxPrice),
       },
-      details: {
-        instantBooking: instant_booking,
-        acreage,
-        guidedHunt: guided_hunt,
-        guestLimitPerDay: guest_limit,
-        lodging,
-        shootingRange: shooting_range,
-        optionalExtendedDetails: extended_details,
-        guestPricePerDay: guest_perPrice,
-      },
       images: imageUrl,
       propertyName: property_name,
-      acreage,
-      guidedHunt: guided_hunt,
-      guestLimit: guest_limit,
-      lodging,
-      shootingRange: shooting_range,
-      extendedDetails: extended_details,
       location: {
         address,
         city,
@@ -104,11 +81,8 @@ const addProperty = async (req, res) => {
       },
       startDate: checkIn,
       endDate: checkOut,
-      disabledDates:parsedDates,
-      pricePerGroupSize: {
-        groupPrice: groupPrice,
-        groupSize: groupSize,
-      },
+      disabledDates: parsedDates,
+      customFields: parsedCustomFields,
     });
 
     const savedListing = await newListing.save();
