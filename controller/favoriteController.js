@@ -24,6 +24,7 @@ const getFav = async (req, res) => {
 
     try {
         const favorites = await favorite.find({ userId }).populate('propertyId');
+
         const formattedFavorites = favorites.map(fav => {
             return {
                 ...fav.propertyId._doc,
