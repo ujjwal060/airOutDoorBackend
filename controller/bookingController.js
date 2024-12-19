@@ -249,6 +249,7 @@ const payment = async (req, res) => {
       await booking.findByIdAndUpdate(bookingId, {
         paymentStatus: "paid",
         paidAmount: amount,
+        bookingStatus:'confirmed',
         paymentIntentId: paymentIntent.id,
       });
 
