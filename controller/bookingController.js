@@ -71,14 +71,37 @@ const getBooking = async (req, res) => {
     });
 
     aggregation.push({
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        pipeline: [
+          { $project: { fullName: 1, _id: 0 } },
+        ],
+        as: "userData",
+      },
+    });
+
+    aggregation.push({
       $addFields: {
         propertyName: { $arrayElemAt: ["$propertyData.propertyName", 0] },
       },
     });
 
     aggregation.push({
+      $addFields: {
+        userName: { $arrayElemAt: ["$userData.fullName", 0] },
+      },
+    });
+
+    aggregation.push({
       $project: {
         propertyData: 0,
+      },
+    });
+    aggregation.push({
+      $project: {
+        userData: 0,
       },
     });
 
