@@ -200,8 +200,7 @@ const cancelBooking = async (req, res) => {
 };
 
 const payment = async (req, res) => {
-  const { amount, token, userId, bookingId, vendorId } = req.body;
-
+  const { amount, token, userId, bookingId, vendorId, propertyId } = req.body;
   try {
     const user = await userModel.findById(userId).select("email");
     if (!user) {
@@ -246,10 +245,19 @@ const payment = async (req, res) => {
       metadata: { userId: userId, bookingId: bookingId, vendorId: vendorId },
     });
     if (paymentIntent.status === "succeeded") {
+      const propertyData = await property
+        .findById(propertyId)
+        .select("adminCommission");
+      const commissionPercent = propertyData.adminCommission;
+      const totalAmount = amount;
+      const adminCommissionAmount = (commissionPercent / 100) * totalAmount;
+      const vendorAmount = totalAmount - adminCommissionAmount;
       await booking.findByIdAndUpdate(bookingId, {
         paymentStatus: "paid",
         paidAmount: amount,
-        bookingStatus:'confirmed',
+        adminAmount: adminCommissionAmount.toFixed(2),
+        vendorAmount: vendorAmount.toFixed(2),
+        bookingStatus: "confirmed",
         paymentIntentId: paymentIntent.id,
       });
 

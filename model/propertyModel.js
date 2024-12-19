@@ -26,8 +26,6 @@ const propertySchema = new mongoose.Schema({
     type: String,
   },
   images: { type: [String] },
-
-
   location: {
     address: {
       type: String,
@@ -57,6 +55,7 @@ const propertySchema = new mongoose.Schema({
 
   adminCommission:{type: Number,},
   pricePerPersonPerDay:{type:Number},
+  cancellationCharge:{type:Number},
   customFields:[],
 
   reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
