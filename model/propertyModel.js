@@ -1,7 +1,7 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose");
 
 const propertySchema = new mongoose.Schema({
-  vendorId: { type: String,},
+  vendorId: { type: String },
   propertyNickname: {
     type: String,
     required: true,
@@ -53,24 +53,24 @@ const propertySchema = new mongoose.Schema({
     },
   },
 
-  adminCommission:{type: Number,},
-  pricePerPersonPerDay:{type:Number},
-  cancellationCharge:{type:Number},
-  customFields:[],
+  adminCommission: { type: Number },
+  pricePerPersonPerDay: { type: Number },
+  cancellationCharge: { type: Number, default: 0  },
+  customFields: [],
 
-  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
+  reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
   averageRating: { type: Number, default: 0 },
   disabledDates: [{ type: Date }],
   startDate: { type: Date },
   endDate: { type: Date },
   isApproveByAdmin: {
     type: Boolean,
-    default: false
+    default: false,
   },
   isFavorite: {
     type: Boolean,
     require: false,
-    default: false
+    default: false,
   },
   createdAt: {
     type: Date,
@@ -78,6 +78,5 @@ const propertySchema = new mongoose.Schema({
   },
 });
 
-
-const Property = mongoose.model('Property', propertySchema);
+const Property = mongoose.model("Property", propertySchema);
 module.exports = Property;
