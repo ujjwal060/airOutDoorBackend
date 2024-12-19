@@ -13,7 +13,7 @@ const calculateAndInitializePayouts = async () => {
         });
         aggregation.push({
             $addFields: {
-                totalAmountNumeric: { $toDouble: "$totalAmount" }
+                totalAmountNumeric: { $toDouble: "$paidAmount" }
             }
         });
         aggregation.push({
