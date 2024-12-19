@@ -54,6 +54,21 @@ const bookingSchema = new mongoose.Schema({
     required: true,
     default:0
   },
+  vendorAmount:{
+    type: String,
+    required: true,
+    default:0
+  },
+  adminAmount:{
+    type: String,
+    required: true,
+    default:0
+  },
+  cancellatonAmount:{
+    type: String,
+    required: true,
+    default:0
+  },
   createdAt: {
     type: Date,
     default: Date.now,
