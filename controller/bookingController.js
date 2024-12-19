@@ -44,11 +44,45 @@ const bookProperty = async (req, res) => {
 
 const getBooking = async (req, res) => {
   try {
-    const vendorId = req.params.vendorId;
-    const bookings = await booking
-      .find({ vendorId: vendorId })
-      .sort({ createdAt: -1 })
-      .populate("userId");
+    const { vendorId, propertyId } = req.body;
+
+    const aggregation = [];
+
+    aggregation.push({
+      $match: { vendorId: vendorId }
+    });
+
+    if (propertyId) {
+      aggregation.push({
+        $match: { propertyId: propertyId }
+      });
+    }
+
+    aggregation.push({
+      $lookup: {
+        from: "properties",
+        localField: "propertyId",
+        foreignField: "_id",
+        pipeline: [
+          { $project: { propertyName: 1, _id: 0 } },
+        ],
+        as: "propertyData",
+      },
+    });
+
+    aggregation.push({
+      $addFields: {
+        propertyName: { $arrayElemAt: ["$propertyData.propertyName", 0] },
+      },
+    });
+
+    aggregation.push({
+      $project: {
+        propertyData: 0,
+      },
+    });
+
+    const bookings = await booking.aggregate(aggregation);
 
     if (!bookings.length) {
       return res
@@ -56,17 +90,8 @@ const getBooking = async (req, res) => {
         .json({ message: "No bookings found for this vendor." });
     }
 
-    const bookingsWithProperties = await Promise.all(
-      bookings.map(async (booking) => {
-        const propertyData = await property.findById(booking.propertyId);
-        return {
-          ...booking._doc,
-          propertyDetails: propertyData,
-        };
-      })
-    );
+    res.status(200).json(bookings);
 
-    return res.status(200).json(bookingsWithProperties);
   } catch (error) {
     return res
       .status(500)
