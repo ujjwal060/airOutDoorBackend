@@ -1,16 +1,7 @@
 const mongoose = require('mongoose');
 
 const reviewSchema = new mongoose.Schema(
-  {
-    // name: {
-    //   type: String,
-    //   required: true,
-    // },
-    // email: {
-    //   type: String,
-    //   required: true,
-    // },
-    // anurag code below  
+  { 
     property: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Property',
@@ -32,7 +23,6 @@ const reviewSchema = new mongoose.Schema(
       min: 1,
       max: 5,
     },
-    // added code above, by anurag 
     review: {
       type: String,
       required: true,

@@ -18,10 +18,16 @@ const bookProperty = async (req, res) => {
       totalAmount,
     } = req.body;
 
+    const cancellation = await property
+      .findById(propertyId)
+      .select("cancellationCharge");
+    console.log(cancellation);
+
     const newBooking = new booking({
       propertyId,
       vendorId,
       userId,
+      cancellationAmount: cancellation.cancellationCharge,
       checkInDate: checkIn,
       checkOutDate: checkOut,
       guests,
@@ -50,12 +56,14 @@ const getBooking = async (req, res) => {
     const aggregation = [];
 
     aggregation.push({
-      $match: { vendorId: vendorId }
+      $match: { vendorId: vendorId },
     });
 
     if (propertyId) {
       aggregation.push({
+
         $match: { propertyId: new mongoose.Types.ObjectId(propertyId) }
+
       });
     }
 
@@ -64,9 +72,7 @@ const getBooking = async (req, res) => {
         from: "properties",
         localField: "propertyId",
         foreignField: "_id",
-        pipeline: [
-          { $project: { propertyName: 1, _id: 0 } },
-        ],
+        pipeline: [{ $project: { propertyName: 1, _id: 0 } }],
         as: "propertyData",
       },
     });
@@ -76,9 +82,7 @@ const getBooking = async (req, res) => {
         from: "users",
         localField: "userId",
         foreignField: "_id",
-        pipeline: [
-          { $project: { fullName: 1, _id: 0 } },
-        ],
+        pipeline: [{ $project: { fullName: 1, _id: 0 } }],
         as: "userData",
       },
     });
@@ -115,7 +119,6 @@ const getBooking = async (req, res) => {
     }
 
     res.status(200).json(bookings);
-
   } catch (error) {
     return res
       .status(500)
@@ -126,7 +129,10 @@ const getBooking = async (req, res) => {
 const getBookingByUser = async (req, res) => {
   try {
     const userId = req.params.userId;
-    const bookings = await booking.find({ userId }).sort({ createdAt: -1 });
+    const bookings = await booking
+      .find({ userId })
+      .sort({ createdAt: -1 })
+      .populate("propertyId");
 
     if (!bookings.length) {
       return res
@@ -201,9 +207,11 @@ const getAllBookings = async (req, res) => {
 
 const cancelBooking = async (req, res) => {
   const { id } = req.params;
-  const CANCELLATION_FEE_PERCENTAGE = 10;
+  const cancelChargePercent = 10;
   try {
     const bookings = await booking.findById(id);
+    const propertyOfBooking=await property.findById(bookings.propertyId).select("cancellationCharge")
+    const cancelChargePercent=propertyOfBooking?.cancellationCharge
 
     if (!bookings) {
       return res.status(404).json({ error: "Booking not found." });
@@ -223,7 +231,7 @@ const cancelBooking = async (req, res) => {
       }
 
       const totalAmount = parseFloat(bookings.totalAmount);
-      const cancellationFee = (CANCELLATION_FEE_PERCENTAGE / 100) * totalAmount;
+      const cancellationFee = (cancelChargePercent / 100) * totalAmount;
       refundAmount = totalAmount - cancellationFee;
 
       const refund = await stripe.refunds.create({
@@ -236,10 +244,10 @@ const cancelBooking = async (req, res) => {
 
     bookings.bookingStatus = "cancelled";
     await bookings.save();
-
+console.log(refundAmount,cancelChargePercent)
     res.status(200).json({
       message: "Booking cancelled successfully.",
-      cancellationFee: `${CANCELLATION_FEE_PERCENTAGE}%`,
+      cancellationFee: `${cancelChargePercent}%`,
       refundableAmount: refundAmount,
       bookings,
     });

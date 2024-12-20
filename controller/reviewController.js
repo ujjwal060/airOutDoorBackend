@@ -67,23 +67,31 @@ const deleteReview = async (req, res) => {
   }
 };
 
-// code below by anurag
-
-// code below by anurag
 const addReview = async (req, res) => {
   try {
-    // Extract data from request body
-    const { propertyId,bookingId, userId, rating, review } = req.body;
+    const { propertyId, bookingId, userId, rating, review } = req.body;
 
-    // Validate required fields
-    if (!propertyId|| !bookingId || !userId || !rating || !review) {
+    // const alreadyReviewed = await Review.find({
+    //   property: propertyId,
+    //   bookingId: bookingId,
+    //   user: userId,
+    // });
+    // console.log(alreadyReviewed)
+
+    // if (alreadyReviewed) {
+    //   return res.status(400).json({
+    //     message: "You Have Already reviewed this Property",
+    //   });
+    // }
+
+    console.log(propertyId, bookingId, userId, rating, review);
+    if (!propertyId || !bookingId || !userId || !rating || !review) {
       return res.status(400).json({
         message:
           "All fields are required: propertyId, userId, rating, and review.",
       });
     }
 
-    // Check if the user exists
     const existUser = await User.findById(userId);
     if (!existUser) {
       return res.status(403).json({
@@ -92,7 +100,6 @@ const addReview = async (req, res) => {
       });
     }
 
-    // Check if the property exists
     const propertyExists = await Property.findById(propertyId);
     if (!propertyExists) {
       return res.status(404).json({
@@ -100,32 +107,26 @@ const addReview = async (req, res) => {
       });
     }
 
-    // Create a new review
     const newReview = new Review({
       property: propertyId,
       user: userId,
-      bookingId:bookingId,
+      bookingId: bookingId,
       rating,
       review,
     });
 
-    // Save the review to the database
     await newReview.save();
 
-    // Add the review to the property's review array
     propertyExists.reviews.push(newReview._id);
     await propertyExists.save();
 
-    // Update the average rating of the property
     const allReviews = await Review.find({ property: propertyId });
     const totalRating = allReviews.reduce((sum, rev) => sum + rev.rating, 0);
     const averageRating = totalRating / allReviews.length;
 
-    // Update the average rating in the property document
-    propertyExists.averageRating = averageRating.toFixed(1); // Update property average rating
-    await propertyExists.save();
-
-    // Respond to the client
+    propertyExists.averageRating = averageRating.toFixed(1);
+    const data = await propertyExists.save();
+    console.log(data, averageRating);
     res.status(201).json({
       message: "Review created successfully!",
       review: newReview,
@@ -145,8 +146,8 @@ const addReview = async (req, res) => {
 
 const getReviews = async (req, res) => {
   try {
-    const { search, page, limit,bookingId, propertyId, userId, vendorId } = req.query;
-    
+    const { search, page, limit, bookingId, propertyId, userId, vendorId } =
+      req.query;
 
     const pageNumber = parseInt(page) || 1;
     const pageSize = parseInt(limit) || 10;

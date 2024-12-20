@@ -57,7 +57,7 @@ const addProperty = async (req, res) => {
       propertyNickname: property_nickname,
       category,
       propertyDescription: property_description,
-      pricePerPersonPerDay:parseFloat(pricePerPersonPerDay),
+      pricePerPersonPerDay: parseFloat(pricePerPersonPerDay),
       images: imageUrl,
       propertyName: property_name,
       location: {
@@ -72,9 +72,7 @@ const addProperty = async (req, res) => {
       startDate: checkIn,
       endDate: checkOut,
       disabledDates: parsedDates,
-      customFields:parsedCustomFields
-
-
+      customFields: parsedCustomFields,
     });
 
     const savedListing = await newListing.save();
@@ -142,7 +140,7 @@ const updateProperty = async (req, res) => {
     const updatedProperty = await Property.findByIdAndUpdate(
       req.params.id,
       updatedData,
-      { new: true } 
+      { new: true }
     );
 
     res.status(200).json(updatedProperty);
@@ -152,7 +150,6 @@ const updateProperty = async (req, res) => {
       .json({ message: "Error updating property", error: error.message });
   }
 };
-
 
 const deleteProperty = async (req, res) => {
   try {
@@ -373,11 +370,14 @@ const getFavoriteProperty = async (req, res) => {
 
 const addCommisionAndApprove = async (req, res) => {
   try {
-    const { approvalPropertyId, adminCommission, dropdownValue } = req.body;
-
+    const {
+      approvalPropertyId,
+      adminCommission,
+      dropdownValue,
+      cancellationCharge,
+    } = req.body;
     const property = await Property.findById(approvalPropertyId);
 
-    // Check if the property is already approved
     if (property.isApproveByAdmin) {
       return res.status(401).json({
         success: false,
@@ -390,7 +390,7 @@ const addCommisionAndApprove = async (req, res) => {
       approvalPropertyId,
       {
         isApproveByAdmin: dropdownValue,
-        adminCommission,
+        adminCommission,cancellationCharge
       },
       { new: true } // Return the updated document if needed
     );
