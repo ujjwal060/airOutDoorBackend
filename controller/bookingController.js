@@ -2,6 +2,7 @@ const booking = require("../model/bookingModel");
 const property = require("../model/propertyModel");
 const userModel = require("../model/userModel");
 const Review = require("../model/reviewModel");
+const mongoose = require('mongoose');
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
 const bookProperty = async (req, res) => {
@@ -60,7 +61,9 @@ const getBooking = async (req, res) => {
 
     if (propertyId) {
       aggregation.push({
-        $match: { propertyId: propertyId },
+
+        $match: { propertyId: new mongoose.Types.ObjectId(propertyId) }
+
       });
     }
 
