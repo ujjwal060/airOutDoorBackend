@@ -64,7 +64,7 @@ const bookingSchema = new mongoose.Schema({
     required: true,
     default:0
   },
-  cancellatonAmount:{
+  cancellationAmount:{
     type: String,
     required: true,
     default:0
